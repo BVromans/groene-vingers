@@ -1,0 +1,12 @@
+# =========================
+# WATER LOGGING BUTTONS
+# =========================
+
+log_plant_1_water:
+  name: Log Plant 1 Water
+
+log_plant_2_water:
+  name: Log Plant 2 Water
+
+log_plant_3_water:
+  name: Log Plant 3 Water

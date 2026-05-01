@@ -1,0 +1,31 @@
+plant_1_name:
+  name: Plant 1 naam
+  initial: Ficus
+
+plant_2_name:
+  name: Plant 2 naam
+  initial: Schefflera
+
+plant_3_name:
+  name: Plant 3 naam
+  initial: Strelitzia
+
+plant_4_name:
+  name: Plant 4 naam
+  initial: Rhododendron
+
+plant_5_name:
+  name: Plant 5 naam
+  initial: Acer Pixie
+
+plant_6_name:
+  name: Plant 6 naam
+  initial: Mandevilla
+
+plant_7_name:
+  name: Plant 7 naam
+  initial: Kweektafel
+
+plant_8_name:
+  name: Plant 8 naam
+  initial: Oleander

@@ -1,0 +1,55 @@
+#Service ID
+dismiss_alert:
+  name: Dismiss alert
+  description: Dismiss an alert
+  target:
+    entity:
+      integration: linktap
+      domain: binary_sensor
+
+dismiss_alerts:
+  name: Dismiss Alerts
+  description: Dismiss all alerts
+  target:
+    entity:
+      integration: linktap
+      domain: binary_sensor
+
+pause:
+  name: Pause
+  description: Pause the watering schedule
+  fields:
+    hours:
+      name: Hours
+      example: 1
+      description: Duration in hours
+  target:
+    entity:
+      integration: linktap
+      domain: switch
+
+pause_valve:
+  name: Pause
+  description: Pause the watering schedule
+  fields:
+    hours:
+      name: Hours
+      example: 1
+      description: Duration in hours
+  target:
+    entity:
+      integration: linktap
+      domain: valve
+
+start_watering:
+  name: Start Watering for X seconds
+  description: Turn on a valve for a set time
+  fields:
+    seconds:
+      name: Seconds
+      example: 900
+      description: Duration in seconds
+  target:
+    entity:
+      integration: linktap
+      domain: valve

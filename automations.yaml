@@ -1,0 +1,611 @@
+# =========================
+# WATER LOGGING
+# =========================
+
+- id: log_plant_1_water
+  alias: Log Plant 1 Water
+
+  trigger:
+    - platform: state
+      entity_id: input_button.log_plant_1_water
+
+  action:
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.plant_1_moisture_before
+      data:
+        value: "{{ states('sensor.plant_1_moisture_delayed') | float(0) }}"
+
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.plant_1_waiting_for_delta
+
+    - service: persistent_notification.create
+      data:
+        title: "Plant Water Logged"
+
+        message: >
+          Plant:
+          {{ states('input_text.plant_1_name') }}
+
+          Moisture Before:
+          {{ states('sensor.plant_1_moisture_delayed') }}%
+
+          Water:
+          {{ states('input_number.plant_water_amount') }} ml
+
+          Method:
+          {{ states('input_select.plant_water_method') }}
+
+          Time:
+          {{ now().strftime('%Y-%m-%d %H:%M:%S') }}
+
+- id: log_plant_2_water
+  alias: Log Plant 2 Water
+
+  trigger:
+    - platform: state
+      entity_id: input_button.log_plant_2_water
+
+  action:
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.plant_2_moisture_before
+      data:
+        value: "{{ states('sensor.plant_2_moisture_delayed') | float(0) }}"
+
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.plant_2_waiting_for_delta
+
+    - service: persistent_notification.create
+      data:
+        title: "Plant Water Logged"
+
+        message: >
+          Plant:
+          {{ states('input_text.plant_2_name') }}
+
+          Moisture Before:
+          {{ states('sensor.plant_2_moisture_delayed') }}%
+
+          Water:
+          {{ states('input_number.plant_water_amount') }} ml
+
+          Method:
+          {{ states('input_select.plant_water_method') }}
+
+          Time:
+          {{ now().strftime('%Y-%m-%d %H:%M:%S') }}
+
+- id: log_plant_3_water
+  alias: Log Plant 3 Water
+
+  trigger:
+    - platform: state
+      entity_id: input_button.log_plant_3_water
+
+  action:
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.plant_3_moisture_before
+      data:
+        value: "{{ states('sensor.plant_3_moisture_delayed') | float(0) }}"
+
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.plant_3_waiting_for_delta
+
+    - service: persistent_notification.create
+      data:
+        title: "Plant Water Logged"
+
+        message: >
+          Plant:
+          {{ states('input_text.plant_3_name') }}
+
+          Moisture Before:
+          {{ states('sensor.plant_3_moisture_delayed') }}%
+
+          Water:
+          {{ states('input_number.plant_water_amount') }} ml
+
+          Method:
+          {{ states('input_select.plant_water_method') }}
+
+          Time:
+          {{ now().strftime('%Y-%m-%d %H:%M:%S') }}
+
+# =========================
+# DELTA MEASUREMENTS
+# =========================
+
+- id: plant_1_measure_delta
+  alias: Plant 1 Measure Delta
+
+  trigger:
+    - platform: state
+      entity_id: input_boolean.plant_1_waiting_for_delta
+      to: "on"
+      for:
+        minutes: 30
+
+  action:
+    - variables:
+        before: "{{ states('input_number.plant_1_moisture_before') | float(0) }}"
+        after: "{{ states('sensor.plant_1_moisture') | float(0) }}"
+        delta: "{{ (after - before) | round(1) }}"
+
+    - service: persistent_notification.create
+      data:
+        title: "Plant Learning Result"
+
+        message: >
+          Plant:
+          {{ states('input_text.plant_1_name') }}
+
+          Before:
+          {{ before }}%
+
+          After:
+          {{ after }}%
+
+          Delta:
+          {{ delta }}%
+
+          Water:
+          {{ states('input_number.plant_water_amount') }} ml
+
+          Method:
+          {{ states('input_select.plant_water_method') }}
+
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.plant_1_last_delta
+      data:
+        value: "{{ delta }}"
+
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.plant_1_last_water
+      data:
+        value: "{{ states('input_number.plant_water_amount') }}"
+
+    - service: shell_command.append_water_learning_log
+      data:
+        line: >
+          {{ now().strftime('%Y-%m-%d %H:%M:%S') }},
+          {{ states('input_text.plant_1_name') }},
+          {{ before }},
+          {{ after }},
+          {{ delta }},
+          {{ states('input_number.plant_water_amount') }},
+          {{ states('input_select.plant_water_method') }}
+
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.plant_1_waiting_for_delta
+
+- id: plant_2_measure_delta
+  alias: Plant 2 Measure Delta
+
+  trigger:
+    - platform: state
+      entity_id: input_boolean.plant_2_waiting_for_delta
+      to: "on"
+      for:
+        minutes: 30
+
+  action:
+    - variables:
+        before: "{{ states('input_number.plant_2_moisture_before') | float(0) }}"
+        after: "{{ states('sensor.plant_2_moisture') | float(0) }}"
+        delta: "{{ (after - before) | round(1) }}"
+
+    - service: persistent_notification.create
+      data:
+        title: "Plant Learning Result"
+
+        message: >
+          Plant:
+          {{ states('input_text.plant_2_name') }}
+
+          Before:
+          {{ before }}%
+
+          After:
+          {{ after }}%
+
+          Delta:
+          {{ delta }}%
+
+          Water:
+          {{ states('input_number.plant_water_amount') }} ml
+
+          Method:
+          {{ states('input_select.plant_water_method') }}
+
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.plant_2_last_delta
+      data:
+        value: "{{ delta }}"
+
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.plant_2_last_water
+      data:
+        value: "{{ states('input_number.plant_water_amount') }}"
+
+    - service: shell_command.append_water_learning_log
+      data:
+        line: >
+          {{ now().strftime('%Y-%m-%d %H:%M:%S') }},
+          {{ states('input_text.plant_2_name') }},
+          {{ before }},
+          {{ after }},
+          {{ delta }},
+          {{ states('input_number.plant_water_amount') }},
+          {{ states('input_select.plant_water_method') }}
+
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.plant_2_waiting_for_delta
+
+- id: plant_3_measure_delta
+  alias: Plant 3 Measure Delta
+
+  trigger:
+    - platform: state
+      entity_id: input_boolean.plant_3_waiting_for_delta
+      to: "on"
+      for:
+        minutes: 30
+
+  action:
+    - variables:
+        before: "{{ states('input_number.plant_3_moisture_before') | float(0) }}"
+        after: "{{ states('sensor.plant_3_moisture') | float(0) }}"
+        delta: "{{ (after - before) | round(1) }}"
+
+    - service: persistent_notification.create
+      data:
+        title: "Plant Learning Result"
+
+        message: >
+          Plant:
+          {{ states('input_text.plant_3_name') }}
+
+          Before:
+          {{ before }}%
+
+          After:
+          {{ after }}%
+
+          Delta:
+          {{ delta }}%
+
+          Water:
+          {{ states('input_number.plant_water_amount') }} ml
+
+          Method:
+          {{ states('input_select.plant_water_method') }}
+
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.plant_3_last_delta
+      data:
+        value: "{{ delta }}"
+
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.plant_3_last_water
+      data:
+        value: "{{ states('input_number.plant_water_amount') }}"
+
+    - service: shell_command.append_water_learning_log
+      data:
+        line: >
+          {{ now().strftime('%Y-%m-%d %H:%M:%S') }},
+          {{ states('input_text.plant_3_name') }},
+          {{ before }},
+          {{ after }},
+          {{ delta }},
+          {{ states('input_number.plant_water_amount') }},
+          {{ states('input_select.plant_water_method') }}
+
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.plant_3_waiting_for_delta
+
+# =========================
+# OUTDOOR WATER LEARNING
+# =========================
+
+# ==========================================
+# ZONE 1 - TUIN
+# ==========================================
+
+- id: outdoor_zone_1_learning
+  alias: Outdoor Zone 1 Learning
+
+  trigger:
+    - platform: state
+      entity_id: switch.taplinker_tuin_linktap_taplinker_1
+      to: "on"
+
+  action:
+
+    # ==========================================
+    # STORE START VALUES
+    # ==========================================
+
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.zone_1_start_timestamp
+      data:
+        value: "{{ now().timestamp() }}"
+
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.zone_1_moisture_before
+      data:
+        value: "{{ states('sensor.plant_4_moisture') | float(0) }}"
+
+    - service: persistent_notification.create
+      data:
+        title: "Zone 1 Learning Started"
+
+        message: >
+          Zone: Tuin
+
+          Start Moisture:
+          {{ states('sensor.plant_4_moisture') }}%
+
+          Timestamp:
+          {{ now().strftime('%Y-%m-%d %H:%M:%S') }}
+
+    # ==========================================
+    # WAIT FOR STOP
+    # ==========================================
+
+    - wait_for_trigger:
+
+        - platform: state
+          entity_id: switch.taplinker_tuin_linktap_taplinker_1
+          to: "off"
+
+    # ==========================================
+    # CALCULATE RUNTIME
+    # ==========================================
+
+    - variables:
+
+        start_ts: >
+          {{ states('input_number.zone_1_start_timestamp') | float(0) }}
+
+        runtime_minutes: >
+          {{ ((now().timestamp() - start_ts) / 60) | round(1) }}
+
+        volume: >
+          {{ states('sensor.taplinker_tuin_linktap_taplinker_1_volume') | float(0) }}
+
+    - service: persistent_notification.create
+      data:
+        title: "Zone 1 Runtime Captured"
+
+        message: >
+          Runtime:
+          {{ runtime_minutes }} min
+
+          Volume:
+          {{ volume }} L
+
+          Waiting 45 minutes for soil stabilization...
+
+    # ==========================================
+    # WAIT FOR INFILTRATION
+    # ==========================================
+
+    - delay:
+        minutes: 45
+
+    # ==========================================
+    # FINAL MEASUREMENT
+    # ==========================================
+
+    - variables:
+
+        before: >
+          {{ states('input_number.zone_1_moisture_before') | float(0) }}
+
+        after: >
+          {{ states('sensor.plant_4_moisture') | float(0) }}
+
+        delta: >
+          {{ (after - before) | round(1) }}
+
+    # ==========================================
+    # COMPLETE NOTIFICATION
+    # ==========================================
+
+    - service: persistent_notification.create
+      data:
+        title: "Outdoor Zone 1 Learning Complete"
+
+        message: >
+          Zone: Tuin
+
+          Before:
+          {{ before }}%
+
+          After:
+          {{ after }}%
+
+          Delta:
+          {{ delta }}%
+
+          Runtime:
+          {{ runtime_minutes }} min
+
+          Volume:
+          {{ volume }} L
+
+    # ==========================================
+    # CSV LOGGING
+    # ==========================================
+
+    - service: shell_command.append_outdoor_learning_log
+      data:
+        line: >
+          {{ now().strftime('%Y-%m-%d %H:%M:%S') }},
+          Zone 1,
+          {{ before }},
+          {{ after }},
+          {{ delta }},
+          {{ runtime_minutes }},
+          {{ volume }}
+
+# ==========================================
+# ZONE 2 - BALKON
+# ==========================================
+
+- id: outdoor_zone_2_learning
+  alias: Outdoor Zone 2 Learning
+
+  trigger:
+    - platform: state
+      entity_id: switch.taplinker_balkon_linktap_taplinker_2
+      to: "on"
+
+  action:
+
+    # ==========================================
+    # STORE START VALUES
+    # ==========================================
+
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.zone_2_start_timestamp
+      data:
+        value: "{{ now().timestamp() }}"
+
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.zone_2_moisture_before
+      data:
+        value: "{{ states('sensor.plant_7_moisture') | float(0) }}"
+
+    - service: persistent_notification.create
+      data:
+        title: "Zone 2 Learning Started"
+
+        message: >
+          Zone: Balkon
+
+          Start Moisture:
+          {{ states('sensor.plant_7_moisture') }}%
+
+          Timestamp:
+          {{ now().strftime('%Y-%m-%d %H:%M:%S') }}
+
+    # ==========================================
+    # WAIT FOR STOP
+    # ==========================================
+
+    - wait_for_trigger:
+
+        - platform: state
+          entity_id: switch.taplinker_balkon_linktap_taplinker_2
+          to: "off"
+
+    # ==========================================
+    # CALCULATE RUNTIME
+    # ==========================================
+
+    - variables:
+
+        start_ts: >
+          {{ states('input_number.zone_2_start_timestamp') | float(0) }}
+
+        runtime_minutes: >
+          {{ ((now().timestamp() - start_ts) / 60) | round(1) }}
+
+        volume: >
+          {{ states('sensor.taplinker_balkon_linktap_taplinker_2_volume') | float(0) }}
+
+    - service: persistent_notification.create
+      data:
+        title: "Zone 2 Runtime Captured"
+
+        message: >
+          Runtime:
+          {{ runtime_minutes }} min
+
+          Volume:
+          {{ volume }} L
+
+          Waiting 45 minutes for soil stabilization...
+
+    # ==========================================
+    # WAIT FOR INFILTRATION
+    # ==========================================
+
+    - delay:
+        minutes: 45
+
+    # ==========================================
+    # FINAL MEASUREMENT
+    # ==========================================
+
+    - variables:
+
+        before: >
+          {{ states('input_number.zone_2_moisture_before') | float(0) }}
+
+        after: >
+          {{ states('sensor.plant_7_moisture') | float(0) }}
+
+        delta: >
+          {{ (after - before) | round(1) }}
+
+    # ==========================================
+    # COMPLETE NOTIFICATION
+    # ==========================================
+
+    - service: persistent_notification.create
+      data:
+        title: "Outdoor Zone 2 Learning Complete"
+
+        message: >
+          Zone: Balkon
+
+          Before:
+          {{ before }}%
+
+          After:
+          {{ after }}%
+
+          Delta:
+          {{ delta }}%
+
+          Runtime:
+          {{ runtime_minutes }} min
+
+          Volume:
+          {{ volume }} L
+
+    # ==========================================
+    # CSV LOGGING
+    # ==========================================
+
+    - service: shell_command.append_outdoor_learning_log
+      data:
+        line: >
+          {{ now().strftime('%Y-%m-%d %H:%M:%S') }},
+          Zone 2,
+          {{ before }},
+          {{ after }},
+          {{ delta }},
+          {{ runtime_minutes }},
+          {{ volume }}

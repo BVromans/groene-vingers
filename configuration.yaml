@@ -1,0 +1,72 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 127.0.0.1
+    - ::1
+    - 100.64.0.0/10
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+input_text: !include helpers/input_text.yaml
+input_select: !include helpers/input_select.yaml
+input_number: !include helpers/input_number.yaml
+input_button: !include helpers/input_button.yaml
+input_boolean: !include helpers/input_boolean.yaml
+
+template: !include templates/plants.yaml
+
+shell_command:
+  append_water_learning_log: '/config/shell/write_water_log.sh "{{ line }}"'
+  append_outdoor_learning_log: '/config/shell/write_outdoor_log.sh "{{ line }}"'  
+
+sensor:
+  - platform: filter
+    name: plant_1_moisture_delayed
+    entity_id: sensor.plant_1_moisture
+    filters:
+      - filter: time_simple_moving_average
+        window_size: "00:15"
+
+  - platform: filter
+    name: plant_2_moisture_delayed
+    entity_id: sensor.plant_2_moisture
+    filters:
+      - filter: time_simple_moving_average
+        window_size: "00:15"
+
+  - platform: filter
+    name: plant_3_moisture_delayed
+    entity_id: sensor.plant_3_moisture
+    filters:
+      - filter: time_simple_moving_average
+        window_size: "00:15"
+
+command_line:
+  - sensor:
+      name: water_learning_last_entry
+      command: "tail -n 1 /config/water_learning_log.csv"
+      scan_interval: 60
+
+  - sensor:
+      name: water_learning_last_10
+      command: "tail -n 10 /config/water_learning_log.csv"
+      scan_interval: 60
+
+  - sensor:
+      name: water_learning_analysis
+      command: "/config/shell/analyze_water_log.sh"
+      scan_interval: 300
+
+  - sensor:
+      name: outdoor_learning_last_entry
+      command: "tail -n 1 /config/outdoor_learning_log.csv"
+      scan_interval: 60

@@ -1,0 +1,28 @@
+# Home Assistant runtime/state
+.storage/
+.cache/
+.cloud/
+.ha_run.lock
+
+# Databases
+home-assistant_v2.db
+home-assistant_v2.db-*
+
+# Logs
+home-assistant.log
+home-assistant.log.*
+
+# Secrets/local overrides
+secrets.yaml
+*.backup
+*.pre-priority.backup
+
+# Python/cache
+__pycache__/
+*.pyc
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

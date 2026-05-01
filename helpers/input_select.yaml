@@ -1,0 +1,170 @@
+plant_1_sensor:
+  name: Plant 1 sensor
+  options:
+    - sensor.gw1200a_soil_moisture_1
+    - sensor.gw1200a_soil_moisture_2
+    - sensor.gw1200a_soil_moisture_3
+    - sensor.gw1200a_soil_moisture_4
+    - sensor.gw1200a_soil_moisture_5
+    - sensor.gw1200a_soil_moisture_6
+    - sensor.gw1200a_soil_moisture_7
+    - sensor.gw1200a_soil_moisture_8
+  initial: sensor.gw1200a_soil_moisture_1
+
+plant_2_sensor:
+  name: Plant 2 sensor
+  options:
+    - sensor.gw1200a_soil_moisture_1
+    - sensor.gw1200a_soil_moisture_2
+    - sensor.gw1200a_soil_moisture_3
+    - sensor.gw1200a_soil_moisture_4
+    - sensor.gw1200a_soil_moisture_5
+    - sensor.gw1200a_soil_moisture_6
+    - sensor.gw1200a_soil_moisture_7
+    - sensor.gw1200a_soil_moisture_8
+  initial: sensor.gw1200a_soil_moisture_2
+
+plant_3_sensor:
+  name: Plant 3 sensor
+  options:
+    - sensor.gw1200a_soil_moisture_1
+    - sensor.gw1200a_soil_moisture_2
+    - sensor.gw1200a_soil_moisture_3
+    - sensor.gw1200a_soil_moisture_4
+    - sensor.gw1200a_soil_moisture_5
+    - sensor.gw1200a_soil_moisture_6
+    - sensor.gw1200a_soil_moisture_7
+    - sensor.gw1200a_soil_moisture_8
+  initial: sensor.gw1200a_soil_moisture_3
+
+plant_4_sensor:
+  name: Plant 4 sensor
+  options:
+    - sensor.gw1200a_soil_moisture_1
+    - sensor.gw1200a_soil_moisture_2
+    - sensor.gw1200a_soil_moisture_3
+    - sensor.gw1200a_soil_moisture_4
+    - sensor.gw1200a_soil_moisture_5
+    - sensor.gw1200a_soil_moisture_6
+    - sensor.gw1200a_soil_moisture_7
+    - sensor.gw1200a_soil_moisture_8
+  initial: sensor.gw1200a_soil_moisture_4
+
+plant_5_sensor:
+  name: Plant 5 sensor
+  options:
+    - sensor.gw1200a_soil_moisture_1
+    - sensor.gw1200a_soil_moisture_2
+    - sensor.gw1200a_soil_moisture_3
+    - sensor.gw1200a_soil_moisture_4
+    - sensor.gw1200a_soil_moisture_5
+    - sensor.gw1200a_soil_moisture_6
+    - sensor.gw1200a_soil_moisture_7
+    - sensor.gw1200a_soil_moisture_8
+  initial: sensor.gw1200a_soil_moisture_5
+
+plant_6_sensor:
+  name: Plant 6 sensor
+  options:
+    - sensor.gw1200a_soil_moisture_1
+    - sensor.gw1200a_soil_moisture_2
+    - sensor.gw1200a_soil_moisture_3
+    - sensor.gw1200a_soil_moisture_4
+    - sensor.gw1200a_soil_moisture_5
+    - sensor.gw1200a_soil_moisture_6
+    - sensor.gw1200a_soil_moisture_7
+    - sensor.gw1200a_soil_moisture_8
+  initial: sensor.gw1200a_soil_moisture_6
+
+plant_7_sensor:
+  name: Plant 7 sensor
+  options:
+    - sensor.gw1200a_soil_moisture_1
+    - sensor.gw1200a_soil_moisture_2
+    - sensor.gw1200a_soil_moisture_3
+    - sensor.gw1200a_soil_moisture_4
+    - sensor.gw1200a_soil_moisture_5
+    - sensor.gw1200a_soil_moisture_6
+    - sensor.gw1200a_soil_moisture_7
+    - sensor.gw1200a_soil_moisture_8
+  initial: sensor.gw1200a_soil_moisture_7
+
+plant_8_sensor:
+  name: Plant 8 sensor
+  options:
+    - sensor.gw1200a_soil_moisture_1
+    - sensor.gw1200a_soil_moisture_2
+    - sensor.gw1200a_soil_moisture_3
+    - sensor.gw1200a_soil_moisture_4
+    - sensor.gw1200a_soil_moisture_5
+    - sensor.gw1200a_soil_moisture_6
+    - sensor.gw1200a_soil_moisture_7
+    - sensor.gw1200a_soil_moisture_8
+  initial: sensor.gw1200a_soil_moisture_8
+
+plant_1_type:
+  name: Plant 1 type
+  options:
+    - indoor
+    - irrigation
+  initial: indoor
+
+plant_2_type:
+  name: Plant 2 type
+  options:
+    - indoor
+    - irrigation
+  initial: indoor
+
+plant_3_type:
+  name: Plant 3 type
+  options:
+    - indoor
+    - irrigation
+  initial: indoor
+
+plant_4_type:
+  name: Plant 4 type
+  options:
+    - indoor
+    - irrigation
+  initial: irrigation
+
+plant_5_type:
+  name: Plant 5 type
+  options:
+    - indoor
+    - irrigation
+  initial: irrigation
+
+plant_6_type:
+  name: Plant 6 type
+  options:
+    - indoor
+    - irrigation
+  initial: irrigation
+
+plant_7_type:
+  name: Plant 7 type
+  options:
+    - indoor
+    - irrigation
+  initial: irrigation
+
+plant_8_type:
+  name: Plant 8 type
+  options:
+    - indoor
+    - irrigation
+  initial: irrigation
+
+# =========================
+# WATER METHOD
+# =========================
+
+plant_water_method:
+  name: Water methode
+  options:
+    - Bovenop grond
+    - Reservoir
+  initial: Bovenop grond

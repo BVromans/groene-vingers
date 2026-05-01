@@ -1,0 +1,22 @@
+# =========================
+# WATER LEARNING FLAGS
+# =========================
+
+plant_1_waiting_for_delta:
+  name: Plant 1 Waiting For Delta
+
+plant_2_waiting_for_delta:
+  name: Plant 2 Waiting For Delta
+
+plant_3_waiting_for_delta:
+  name: Plant 3 Waiting For Delta
+
+# =========================
+# OUTDOOR LEARNING FLAGS
+# =========================
+
+zone_1_waiting_for_delta:
+  name: Zone 1 Waiting For Delta
+
+zone_2_waiting_for_delta:
+  name: Zone 2 Waiting For Delta
