@@ -13,6 +13,7 @@ Het systeem moet uiteindelijk:
 - inefficiënte druppelaars detecteren
 - advies geven over:
   - langere/kortere runtime
+  
   - extra druppelaars
   - 2L/u vs 4L/u
   - sensorplaatsing

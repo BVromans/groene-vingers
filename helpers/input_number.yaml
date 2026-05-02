@@ -138,6 +138,12 @@ zone_1_last_volume:
   max: 500
   step: 0.1
 
+zone_1_last_delta:
+  name: Zone 1 Last Delta
+  min: -100
+  max: 100
+  step: 0.1
+
 zone_2_moisture_before:
   name: Zone 2 Moisture Before
   min: 0
@@ -154,4 +160,10 @@ zone_2_last_volume:
   name: Zone 2 Last Volume
   min: 0
   max: 500
+  step: 0.1
+
+zone_2_last_delta:
+  name: Zone 2 Last Delta
+  min: -100
+  max: 100
   step: 0.1

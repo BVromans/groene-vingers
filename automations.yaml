@@ -455,6 +455,12 @@
     # CSV LOGGING
     # ==========================================
 
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.zone_1_last_delta
+      data:
+        value: "{{ delta }}"
+
     - service: shell_command.append_outdoor_learning_log
       data:
         line: >
@@ -598,6 +604,12 @@
     # ==========================================
     # CSV LOGGING
     # ==========================================
+
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.zone_2_last_delta
+      data:
+        value: "{{ delta }}"
 
     - service: shell_command.append_outdoor_learning_log
       data:
