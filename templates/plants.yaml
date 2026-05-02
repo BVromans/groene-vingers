@@ -1464,6 +1464,197 @@
         {% endif %}
 
     # ==========================================
+    # ZONE 1 GEZONDHEIDSSCORE
+    # ==========================================
+
+    - name: Zone 1 Gezondheidsscore
+
+      unique_id: zone_1_health_score
+
+      unit_of_measurement: "%"
+
+      state: >
+
+        {% set score = 100 %}
+
+        {% set confidence =
+          states('sensor.zone_1_recommendation_confidence')
+        %}
+
+        {% set anomaly =
+          states('sensor.zone_1_monitor_afwijkingen')
+        %}
+
+        {% set efficiency =
+          states('sensor.zone_1_irrigation_efficiency') | float(0)
+        %}
+
+        {% set dryback =
+          states('sensor.zone_1_dryback_speed')
+        %}
+
+        {% set demand =
+          states('sensor.zone_1_water_demand')
+        %}
+
+        {# Confidence #}
+        {% if confidence == 'medium' %}
+          {% set score = score - 10 %}
+        {% elif confidence != 'high' %}
+          {% set score = score - 20 %}
+        {% endif %}
+
+        {# Anomalies #}
+        {% if anomaly == 'waarschuwing' %}
+          {% set score = score - 20 %}
+        {% elif anomaly == 'kritisch' %}
+          {% set score = score - 40 %}
+        {% endif %}
+
+        {# Efficiency #}
+        {% if efficiency < 0.05 %}
+          {% set score = score - 20 %}
+        {% elif efficiency < 0.15 %}
+          {% set score = score - 10 %}
+        {% endif %}
+
+        {# Dryback #}
+        {% if dryback == 'extreme' %}
+          {% set score = score - 15 %}
+        {% elif dryback == 'fast' %}
+          {% set score = score - 8 %}
+        {% endif %}
+
+        {# Water demand #}
+        {% if demand == 'extreme' %}
+          {% set score = score - 15 %}
+        {% elif demand == 'high' %}
+          {% set score = score - 8 %}
+        {% endif %}
+
+        {{ [score, 0] | max }}
+
+    # ==========================================
+    # ZONE 2 GEZONDHEIDSSCORE
+    # ==========================================
+
+    - name: Zone 2 Gezondheidsscore
+
+      unique_id: zone_2_health_score
+
+      unit_of_measurement: "%"
+
+      state: >
+
+        {% set score = 100 %}
+
+        {% set confidence =
+          states('sensor.zone_2_recommendation_confidence')
+        %}
+
+        {% set anomaly =
+          states('sensor.zone_2_monitor_afwijkingen')
+        %}
+
+        {% set efficiency =
+          states('sensor.zone_2_irrigation_efficiency') | float(0)
+        %}
+
+        {% set dryback =
+          states('sensor.zone_2_dryback_speed')
+        %}
+
+        {% set demand =
+          states('sensor.zone_2_water_demand')
+        %}
+
+        {% if confidence == 'medium' %}
+          {% set score = score - 10 %}
+        {% elif confidence != 'high' %}
+          {% set score = score - 20 %}
+        {% endif %}
+
+        {% if anomaly == 'waarschuwing' %}
+          {% set score = score - 20 %}
+        {% elif anomaly == 'kritisch' %}
+          {% set score = score - 40 %}
+        {% endif %}
+
+        {% if efficiency < 0.05 %}
+          {% set score = score - 20 %}
+        {% elif efficiency < 0.15 %}
+          {% set score = score - 10 %}
+        {% endif %}
+
+        {% if dryback == 'extreme' %}
+          {% set score = score - 15 %}
+        {% elif dryback == 'fast' %}
+          {% set score = score - 8 %}
+        {% endif %}
+
+        {% if demand == 'extreme' %}
+          {% set score = score - 15 %}
+        {% elif demand == 'high' %}
+          {% set score = score - 8 %}
+        {% endif %}
+
+        {{ [score, 0] | max }}
+
+    # ==========================================
+    # ZONE 1 GEZONDHEIDSSTATUS
+    # ==========================================
+
+    - name: Zone 1 Gezondheidsstatus
+
+      unique_id: zone_1_health_status
+
+      state: >
+
+        {% set score =
+          states('sensor.zone_1_gezondheidsscore') | float(0)
+        %}
+
+        {% if score >= 90 %}
+          uitstekend
+
+        {% elif score >= 70 %}
+          goed
+
+        {% elif score >= 50 %}
+          waarschuwing
+
+        {% else %}
+          kritiek
+        {% endif %}
+
+    # ==========================================
+    # ZONE 2 GEZONDHEIDSSTATUS
+    # ==========================================
+
+    - name: Zone 2 Gezondheidsstatus
+
+      unique_id: zone_2_health_status
+
+      state: >
+
+        {% set score =
+          states('sensor.zone_2_gezondheidsscore') | float(0)
+        %}
+
+        {% if score >= 90 %}
+          uitstekend
+
+        {% elif score >= 70 %}
+          goed
+
+        {% elif score >= 50 %}
+          waarschuwing
+
+        {% else %}
+          kritiek
+        {% endif %}
+
+    # ==========================================
     # SENSOR 1 DRYBACK
     # ==========================================
 
