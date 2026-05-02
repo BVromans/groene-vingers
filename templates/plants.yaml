@@ -1248,6 +1248,152 @@
         {% endif %}
 
     # ==========================================
+    # ZONE 1 BEWATERINGSKWALITEIT
+    # ==========================================
+
+    - name: Zone 1 Bewateringskwaliteit
+
+      unique_id: zone_1_bewateringskwaliteit
+
+      state: >
+
+        {% set delta =
+          states('input_number.zone_1_last_delta') | float(0)
+        %}
+
+        {% set efficiency =
+          states('sensor.zone_1_irrigation_efficiency') | float(0)
+        %}
+
+        {% if delta <= 1 %}
+          onvoldoende
+
+        {% elif efficiency >= 0.25 %}
+          optimaal
+
+        {% elif efficiency < 0.08 %}
+          overmatig
+
+        {% else %}
+          acceptabel
+        {% endif %}
+
+    # ==========================================
+    # ZONE 2 BEWATERINGSKWALITEIT
+    # ==========================================
+
+    - name: Zone 2 Bewateringskwaliteit
+
+      unique_id: zone_2_bewateringskwaliteit
+
+      state: >
+
+        {% set delta =
+          states('input_number.zone_2_last_delta') | float(0)
+        %}
+
+        {% set efficiency =
+          states('sensor.zone_2_irrigation_efficiency') | float(0)
+        %}
+
+        {% if delta <= 1 %}
+          onvoldoende
+
+        {% elif efficiency >= 0.25 %}
+          optimaal
+
+        {% elif efficiency < 0.08 %}
+          overmatig
+
+        {% else %}
+          acceptabel
+        {% endif %}
+
+    # ==========================================
+    # ZONE 1 WATER DEMAND
+    # ==========================================
+
+    - name: Zone 1 Water Demand
+
+      unique_id: zone_1_water_demand
+
+      state: >
+
+        {% set dryback =
+          states('sensor.zone_1_dryback_speed')
+        %}
+
+        {% set weather =
+          states('sensor.weather_stress_level')
+        %}
+
+        {% set quality =
+          states('sensor.zone_1_bewateringskwaliteit')
+        %}
+
+        {% if dryback == 'extreme'
+          or weather == 'extreme'
+        %}
+          extreme
+
+        {% elif dryback == 'fast'
+          and weather in ['high', 'extreme']
+        %}
+          high
+
+        {% elif quality == 'onvoldoende' %}
+          high
+
+        {% elif dryback == 'normal' %}
+          medium
+
+        {% else %}
+          low
+        {% endif %}
+
+    # ==========================================
+    # ZONE 2 WATER DEMAND
+    # ==========================================
+
+    - name: Zone 2 Water Demand
+
+      unique_id: zone_2_water_demand
+
+      state: >
+
+        {% set dryback =
+          states('sensor.zone_2_dryback_speed')
+        %}
+
+        {% set weather =
+          states('sensor.weather_stress_level')
+        %}
+
+        {% set quality =
+          states('sensor.zone_2_bewateringskwaliteit')
+        %}
+
+        {% if dryback == 'extreme'
+          or weather == 'extreme'
+        %}
+          extreme
+
+        {% elif dryback == 'fast'
+          and weather in ['high', 'extreme']
+        %}
+          high
+
+        {% elif quality == 'onvoldoende' %}
+          high
+
+        {% elif dryback == 'normal' %}
+          medium
+
+        {% else %}
+          low
+        {% endif %}
+
+    # ==========================================
     # SENSOR 1 DRYBACK
     # ==========================================
 
