@@ -1394,6 +1394,76 @@
         {% endif %}
 
     # ==========================================
+    # ZONE 1 MONITOR AFWIJKINGEN
+    # ==========================================
+
+    - name: Zone 1 Monitor Afwijkingen
+
+      unique_id: zone_1_monitor_afwijkingen
+
+      state: >
+
+        {% set efficiency =
+          states('sensor.zone_1_irrigation_efficiency') | float(0)
+        %}
+
+        {% set delta =
+          states('input_number.zone_1_last_delta') | float(0)
+        %}
+
+        {% set dryback =
+          states('sensor.zone_1_dryback_speed')
+        %}
+
+        {% if delta <= 0.5 %}
+          kritisch
+
+        {% elif efficiency < 0.05 %}
+          waarschuwing
+
+        {% elif dryback == 'extreme' %}
+          waarschuwing
+
+        {% else %}
+          normaal
+        {% endif %}
+
+    # ==========================================
+    # ZONE 2 MONITOR AFWIJKINGEN
+    # ==========================================
+
+    - name: Zone 2 Monitor Afwijkingen
+
+      unique_id: zone_2_monitor_afwijkingen
+
+      state: >
+
+        {% set efficiency =
+          states('sensor.zone_2_irrigation_efficiency') | float(0)
+        %}
+
+        {% set delta =
+          states('input_number.zone_2_last_delta') | float(0)
+        %}
+
+        {% set dryback =
+          states('sensor.zone_2_dryback_speed')
+        %}
+
+        {% if delta <= 0.5 %}
+          kritisch
+
+        {% elif efficiency < 0.05 %}
+          waarschuwing
+
+        {% elif dryback == 'extreme' %}
+          waarschuwing
+
+        {% else %}
+          normaal
+        {% endif %}
+
+    # ==========================================
     # SENSOR 1 DRYBACK
     # ==========================================
 
