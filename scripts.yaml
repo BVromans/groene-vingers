@@ -1,0 +1,37 @@
+start_tuin_irrigatie:
+  alias: Start Tuin Irrigatie
+
+  sequence:
+
+    - action: linktap.start_watering
+
+      target:
+        entity_id:
+          valve.taplinker_tuin_linktap_taplinker_1
+
+      data:
+        seconds: >
+          {{
+            states(
+              'input_number.tuin_runtime_minuten'
+            ) | int * 60
+          }}
+
+start_balkon_irrigatie:
+  alias: Start Balkon Irrigatie
+
+  sequence:
+
+    - action: linktap.start_watering
+
+      target:
+        entity_id:
+          valve.taplinker_balkon_linktap_taplinker_2
+
+      data:
+        seconds: >
+          {{
+            states(
+              'input_number.balkon_runtime_minuten'
+            ) | int * 60
+          }}
