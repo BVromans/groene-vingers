@@ -15,6 +15,7 @@
         - input_text.plant_6_name
         - input_text.plant_7_name
         - input_text.plant_8_name
+        - input_text.plant_9_name
 
         # Sensor mappings
         - input_select.plant_1_sensor
@@ -25,6 +26,7 @@
         - input_select.plant_6_sensor
         - input_select.plant_7_sensor
         - input_select.plant_8_sensor
+        - input_select.plant_9_sensor
 
         # Moisture sensors
         - sensor.gw1200a_soil_moisture_1
@@ -35,6 +37,7 @@
         - sensor.gw1200a_soil_moisture_6
         - sensor.gw1200a_soil_moisture_7
         - sensor.gw1200a_soil_moisture_8
+        - sensor.gw1200a_soil_moisture_9
 
         # Battery sensors
         - sensor.gw1200a_soil_battery_1
@@ -45,6 +48,7 @@
         - sensor.gw1200a_soil_battery_6
         - sensor.gw1200a_soil_battery_7
         - sensor.gw1200a_soil_battery_8
+        - sensor.gw1200a_soil_battery_9
 
   sensor:
 
@@ -608,6 +612,77 @@
 
       state: >
         {% set raw = states('sensor.gw1200a_soil_battery_8') %}
+
+        {% if raw not in ['unknown', 'unavailable', 'none', ''] %}
+          {% set v = raw | float(1.0) %}
+          {{ [0, [100, ((v - 1.0) / 0.5 * 100)] | min] | max | round(0) }}
+        {% else %}
+          0
+        {% endif %}
+
+    # =========================
+    # PLANT 9
+    # =========================
+
+    - name: >
+        {{ states('input_text.plant_9_name') }}
+
+      unique_id: plant_9_moisture
+      unit_of_measurement: "%"
+      state_class: measurement
+
+      state: >
+        {% set s = states('input_select.plant_9_sensor') %}
+        {{ states(s) | float(0) }}
+
+    - name: >
+        {{ states('input_text.plant_9_name') }} Water Status
+
+      unique_id: plant_9_water_status
+
+      state: >
+        {% set v = states('sensor.template_plant_9_moisture') | float(0) %}
+        {% set t = states('input_number.plant_9_target_moisture') | float(30) %}
+
+        {% if v < t %}
+          water_needed
+        {% elif v < t + 8 %}
+          ok
+        {% else %}
+          too_wet
+        {% endif %}
+
+    - name: >
+        {{ states('input_text.plant_9_name') }} Priority
+
+      unique_id: plant_9_priority
+
+      state: >
+        {% set v = states('sensor.template_plant_9_moisture') | float(0) %}
+        {% set t = states('input_number.plant_9_target_moisture') | float(30) %}
+        {% set diff = v - t %}
+
+        {% if diff <= -10 %}
+          critical
+
+        {% elif diff <= -5 %}
+          dry
+
+        {% elif diff < 8 %}
+          ok
+
+        {% else %}
+          wet
+        {% endif %}
+
+    - name: >
+        {{ states('input_text.plant_9_name') }} Battery
+
+      unique_id: plant_9_battery
+      unit_of_measurement: "%"
+
+      state: >
+        {% set raw = states('sensor.gw1200a_soil_battery_9') %}
 
         {% if raw not in ['unknown', 'unavailable', 'none', ''] %}
           {% set v = raw | float(1.0) %}
@@ -2292,3 +2367,23 @@
         {% else %}
           normal_irrigation
         {% endif %}
+
+- sensor:
+    # Compatibility aliases so Plant 9 matches existing Plant 1-8 dashboard naming.
+    - name: plant_9_moisture
+
+      unique_id: plant_9_moisture_compat
+      unit_of_measurement: "%"
+      state_class: measurement
+
+      state: >
+        {{ states('sensor.template_plant_9_moisture') }}
+
+    - name: plant_9_battery
+
+      unique_id: plant_9_battery_compat
+      unit_of_measurement: "%"
+      state_class: measurement
+
+      state: >
+        {{ states('sensor.template_plant_9_battery') }}

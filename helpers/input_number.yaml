@@ -46,6 +46,12 @@ plant_8_target_moisture:
   max: 70
   step: 1
 
+plant_9_target_moisture:
+  name: Plant 9 target moisture
+  min: 10
+  max: 70
+  step: 1
+
 # =========================
 # WATER LOGGING
 # =========================
@@ -61,6 +67,24 @@ plant_water_amount:
 # =========================
 # WATER LEARNING
 # =========================
+
+plant_9_moisture_before:
+  name: Plant 9 Moisture Before
+  min: 0
+  max: 100
+  step: 1
+
+plant_9_last_delta:
+  name: Plant 9 Last Delta
+  min: -100
+  max: 100
+  step: 0.1
+
+plant_9_last_water:
+  name: Plant 9 Last Water
+  min: 0
+  max: 5000
+  step: 1
 
 plant_1_moisture_before:
   name: Plant 1 Moisture Before

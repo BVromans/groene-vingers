@@ -16,6 +16,13 @@
       data:
         value: "{{ states('sensor.plant_1_moisture_delayed') | float(0) }}"
 
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.plant_1_waiting_for_delta
+
+    - delay:
+        seconds: 1
+
     - service: input_boolean.turn_on
       target:
         entity_id: input_boolean.plant_1_waiting_for_delta
@@ -54,6 +61,13 @@
       data:
         value: "{{ states('sensor.plant_2_moisture_delayed') | float(0) }}"
 
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.plant_2_waiting_for_delta
+
+    - delay:
+        seconds: 1
+
     - service: input_boolean.turn_on
       target:
         entity_id: input_boolean.plant_2_waiting_for_delta
@@ -91,6 +105,13 @@
         entity_id: input_number.plant_3_moisture_before
       data:
         value: "{{ states('sensor.plant_3_moisture_delayed') | float(0) }}"
+
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.plant_3_waiting_for_delta
+
+    - delay:
+        seconds: 1
 
     - service: input_boolean.turn_on
       target:
@@ -319,6 +340,234 @@
         entity_id: input_boolean.plant_3_waiting_for_delta
 
 # =========================
+# LEARNING RECOVERY (STUCK WAITING)
+# =========================
+
+- id: plant_learning_recovery_stuck_waiting
+  alias: Plant Learning Recovery Stuck Waiting
+
+  trigger:
+    - platform: time_pattern
+      minutes: "/5"
+
+  action:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >
+                {{
+                  is_state('input_boolean.plant_1_waiting_for_delta', 'on')
+                  and
+                  (
+                    as_timestamp(now())
+                    -
+                    as_timestamp(states.input_boolean.plant_1_waiting_for_delta.last_changed, 0)
+                  ) > 2400
+                }}
+          sequence:
+            - variables:
+                before: "{{ states('input_number.plant_1_moisture_before') | float(0) }}"
+                after: "{{ states('sensor.plant_1_moisture') | float(0) }}"
+                delta: "{{ (after - before) | round(1) }}"
+
+            - service: persistent_notification.create
+              data:
+                title: "Plant Learning Result"
+
+                message: >
+                  Plant:
+                  {{ states('input_text.plant_1_name') }}
+
+                  Before:
+                  {{ before }}%
+
+                  After:
+                  {{ after }}%
+
+                  Delta:
+                  {{ delta }}%
+
+                  Water:
+                  {{ states('input_number.plant_water_amount') }} ml
+
+                  Method:
+                  {{ states('input_select.plant_water_method') }}
+
+                  Recovery:
+                  waiting_stuck
+
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.plant_1_last_delta
+              data:
+                value: "{{ delta }}"
+
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.plant_1_last_water
+              data:
+                value: "{{ states('input_number.plant_water_amount') }}"
+
+            - service: shell_command.append_water_learning_log
+              data:
+                line: >
+                  {{ now().strftime('%Y-%m-%d %H:%M:%S') }},
+                  {{ states('input_text.plant_1_name') }},
+                  {{ before }},
+                  {{ after }},
+                  {{ delta }},
+                  {{ states('input_number.plant_water_amount') }},
+                  {{ states('input_select.plant_water_method') }}
+
+            - service: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.plant_1_waiting_for_delta
+
+        - conditions:
+            - condition: template
+              value_template: >
+                {{
+                  is_state('input_boolean.plant_2_waiting_for_delta', 'on')
+                  and
+                  (
+                    as_timestamp(now())
+                    -
+                    as_timestamp(states.input_boolean.plant_2_waiting_for_delta.last_changed, 0)
+                  ) > 2400
+                }}
+          sequence:
+            - variables:
+                before: "{{ states('input_number.plant_2_moisture_before') | float(0) }}"
+                after: "{{ states('sensor.plant_2_moisture') | float(0) }}"
+                delta: "{{ (after - before) | round(1) }}"
+
+            - service: persistent_notification.create
+              data:
+                title: "Plant Learning Result"
+
+                message: >
+                  Plant:
+                  {{ states('input_text.plant_2_name') }}
+
+                  Before:
+                  {{ before }}%
+
+                  After:
+                  {{ after }}%
+
+                  Delta:
+                  {{ delta }}%
+
+                  Water:
+                  {{ states('input_number.plant_water_amount') }} ml
+
+                  Method:
+                  {{ states('input_select.plant_water_method') }}
+
+                  Recovery:
+                  waiting_stuck
+
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.plant_2_last_delta
+              data:
+                value: "{{ delta }}"
+
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.plant_2_last_water
+              data:
+                value: "{{ states('input_number.plant_water_amount') }}"
+
+            - service: shell_command.append_water_learning_log
+              data:
+                line: >
+                  {{ now().strftime('%Y-%m-%d %H:%M:%S') }},
+                  {{ states('input_text.plant_2_name') }},
+                  {{ before }},
+                  {{ after }},
+                  {{ delta }},
+                  {{ states('input_number.plant_water_amount') }},
+                  {{ states('input_select.plant_water_method') }}
+
+            - service: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.plant_2_waiting_for_delta
+
+        - conditions:
+            - condition: template
+              value_template: >
+                {{
+                  is_state('input_boolean.plant_3_waiting_for_delta', 'on')
+                  and
+                  (
+                    as_timestamp(now())
+                    -
+                    as_timestamp(states.input_boolean.plant_3_waiting_for_delta.last_changed, 0)
+                  ) > 2400
+                }}
+          sequence:
+            - variables:
+                before: "{{ states('input_number.plant_3_moisture_before') | float(0) }}"
+                after: "{{ states('sensor.plant_3_moisture') | float(0) }}"
+                delta: "{{ (after - before) | round(1) }}"
+
+            - service: persistent_notification.create
+              data:
+                title: "Plant Learning Result"
+
+                message: >
+                  Plant:
+                  {{ states('input_text.plant_3_name') }}
+
+                  Before:
+                  {{ before }}%
+
+                  After:
+                  {{ after }}%
+
+                  Delta:
+                  {{ delta }}%
+
+                  Water:
+                  {{ states('input_number.plant_water_amount') }} ml
+
+                  Method:
+                  {{ states('input_select.plant_water_method') }}
+
+                  Recovery:
+                  waiting_stuck
+
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.plant_3_last_delta
+              data:
+                value: "{{ delta }}"
+
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.plant_3_last_water
+              data:
+                value: "{{ states('input_number.plant_water_amount') }}"
+
+            - service: shell_command.append_water_learning_log
+              data:
+                line: >
+                  {{ now().strftime('%Y-%m-%d %H:%M:%S') }},
+                  {{ states('input_text.plant_3_name') }},
+                  {{ before }},
+                  {{ after }},
+                  {{ delta }},
+                  {{ states('input_number.plant_water_amount') }},
+                  {{ states('input_select.plant_water_method') }}
+
+            - service: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.plant_3_waiting_for_delta
+
+  mode: single
+
+# =========================
 # OUTDOOR WATER LEARNING
 # =========================
 
@@ -350,7 +599,15 @@
       target:
         entity_id: input_number.zone_1_moisture_before
       data:
-        value: "{{ states('sensor.plant_4_moisture') | float(0) }}"
+        value: >
+          {{
+            (
+              (states('sensor.plant_4_moisture') | float(0))
+              +
+              (states('sensor.template_plant_9_moisture') | float(0))
+            ) / 2
+            | round(1)
+          }}
 
     - service: persistent_notification.create
       data:
@@ -359,8 +616,14 @@
         message: >
           Zone: Tuin
 
-          Start Moisture:
+          Start Moisture (avg S4+S9):
+          {{ states('input_number.zone_1_moisture_before') }}%
+
+          Sensor 4:
           {{ states('sensor.plant_4_moisture') }}%
+
+          Sensor 9:
+          {{ states('sensor.template_plant_9_moisture') }}%
 
           Timestamp:
           {{ now().strftime('%Y-%m-%d %H:%M:%S') }}
@@ -420,7 +683,14 @@
           {{ states('input_number.zone_1_moisture_before') | float(0) }}
 
         after: >
-          {{ states('sensor.plant_4_moisture') | float(0) }}
+          {{
+            (
+              (states('sensor.plant_4_moisture') | float(0))
+              +
+              (states('sensor.template_plant_9_moisture') | float(0))
+            ) / 2
+            | round(1)
+          }}
 
         delta: >
           {{ (after - before) | round(1) }}
@@ -441,6 +711,12 @@
 
           After:
           {{ after }}%
+
+          Sensor 4:
+          {{ states('sensor.plant_4_moisture') }}%
+
+          Sensor 9:
+          {{ states('sensor.template_plant_9_moisture') }}%
 
           Delta:
           {{ delta }}%
@@ -621,3 +897,30 @@
           {{ delta }},
           {{ runtime_minutes }},
           {{ volume }}
+
+# =========================
+# LINKTAP STARTUP HEALTH CHECK
+# =========================
+
+- id: linktap_startup_health_check
+  alias: LinkTap Startup Health Check
+
+  trigger:
+    - platform: homeassistant
+      event: start
+
+  action:
+    - delay:
+        seconds: 60
+
+    - condition: template
+      value_template: "{{ not has_service('linktap', 'start_watering') }}"
+
+    - service: persistent_notification.create
+      data:
+        title: "LinkTap Service Unavailable"
+        message: >
+          De LinkTap service `linktap.start_watering` is niet beschikbaar na HA-start.
+          Controleer of de LinkTap controller online is en reload/restart de integratie.
+
+  mode: single

@@ -102,6 +102,20 @@ plant_8_sensor:
     - sensor.gw1200a_soil_moisture_8
   initial: sensor.gw1200a_soil_moisture_8
 
+plant_9_sensor:
+  name: Plant 9 sensor
+  options:
+    - sensor.gw1200a_soil_moisture_1
+    - sensor.gw1200a_soil_moisture_2
+    - sensor.gw1200a_soil_moisture_3
+    - sensor.gw1200a_soil_moisture_4
+    - sensor.gw1200a_soil_moisture_5
+    - sensor.gw1200a_soil_moisture_6
+    - sensor.gw1200a_soil_moisture_7
+    - sensor.gw1200a_soil_moisture_8
+    - sensor.gw1200a_soil_moisture_9
+  initial: sensor.gw1200a_soil_moisture_9
+
 plant_1_type:
   name: Plant 1 type
   options:
@@ -153,6 +167,13 @@ plant_7_type:
 
 plant_8_type:
   name: Plant 8 type
+  options:
+    - indoor
+    - irrigation
+  initial: irrigation
+
+plant_9_type:
+  name: Plant 9 type
   options:
     - indoor
     - irrigation
