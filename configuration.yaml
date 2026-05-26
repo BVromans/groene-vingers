@@ -58,7 +58,11 @@ command_line:
 
   - sensor:
       name: water_learning_last_10
-      command: "tail -n 10 /config/water_learning_log.csv"
+      command: >
+        python3 -c "import json,pathlib; p=pathlib.Path('/config/water_learning_log.csv'); lines=p.read_text(encoding='utf-8', errors='ignore').splitlines()[-10:] if p.exists() else []; print(json.dumps({'state':'ok' if lines else 'empty','entries':'\\n'.join(lines)}))"
+      value_template: "{{ value_json.state }}"
+      json_attributes:
+        - entries
       scan_interval: 60
 
   - sensor:
