@@ -923,4 +923,217 @@
           De LinkTap service `linktap.start_watering` is niet beschikbaar na HA-start.
           Controleer of de LinkTap controller online is en reload/restart de integratie.
 
+# =========================
+# PLANT WATERING NOTIFICATIONS
+# =========================
+
+- id: plant_watering_alert
+  alias: Plant Watering Alert (dashboard color change)
+  mode: parallel
+
+  trigger:
+    - platform: template
+      id: "1_orange"
+      value_template: >
+        {% set m = states('sensor.plant_1_moisture') | float(0) %}
+        {% set t = states('input_number.plant_1_target_moisture') | float(0) %}
+        {{ m < t and m >= (t - 5) }}
+
+    - platform: template
+      id: "1_red"
+      value_template: >
+        {% set m = states('sensor.plant_1_moisture') | float(0) %}
+        {% set t = states('input_number.plant_1_target_moisture') | float(0) %}
+        {{ m < (t - 5) }}
+
+    - platform: template
+      id: "2_orange"
+      value_template: >
+        {% set m = states('sensor.plant_2_moisture') | float(0) %}
+        {% set t = states('input_number.plant_2_target_moisture') | float(0) %}
+        {{ m < t and m >= (t - 5) }}
+
+    - platform: template
+      id: "2_red"
+      value_template: >
+        {% set m = states('sensor.plant_2_moisture') | float(0) %}
+        {% set t = states('input_number.plant_2_target_moisture') | float(0) %}
+        {{ m < (t - 5) }}
+
+    - platform: template
+      id: "3_orange"
+      value_template: >
+        {% set m = states('sensor.plant_3_moisture') | float(0) %}
+        {% set t = states('input_number.plant_3_target_moisture') | float(0) %}
+        {{ m < t and m >= (t - 5) }}
+
+    - platform: template
+      id: "3_red"
+      value_template: >
+        {% set m = states('sensor.plant_3_moisture') | float(0) %}
+        {% set t = states('input_number.plant_3_target_moisture') | float(0) %}
+        {{ m < (t - 5) }}
+
+    - platform: template
+      id: "4_orange"
+      value_template: >
+        {% set m = states('sensor.plant_4_moisture') | float(0) %}
+        {% set t = states('input_number.plant_4_target_moisture') | float(0) %}
+        {{ m < t and m >= (t - 5) }}
+
+    - platform: template
+      id: "4_red"
+      value_template: >
+        {% set m = states('sensor.plant_4_moisture') | float(0) %}
+        {% set t = states('input_number.plant_4_target_moisture') | float(0) %}
+        {{ m < (t - 5) }}
+
+    - platform: template
+      id: "5_orange"
+      value_template: >
+        {% set m = states('sensor.plant_5_moisture') | float(0) %}
+        {% set t = states('input_number.plant_5_target_moisture') | float(0) %}
+        {{ m < t and m >= (t - 5) }}
+
+    - platform: template
+      id: "5_red"
+      value_template: >
+        {% set m = states('sensor.plant_5_moisture') | float(0) %}
+        {% set t = states('input_number.plant_5_target_moisture') | float(0) %}
+        {{ m < (t - 5) }}
+
+    - platform: template
+      id: "6_orange"
+      value_template: >
+        {% set m = states('sensor.plant_6_moisture') | float(0) %}
+        {% set t = states('input_number.plant_6_target_moisture') | float(0) %}
+        {{ m < t and m >= (t - 5) }}
+
+    - platform: template
+      id: "6_red"
+      value_template: >
+        {% set m = states('sensor.plant_6_moisture') | float(0) %}
+        {% set t = states('input_number.plant_6_target_moisture') | float(0) %}
+        {{ m < (t - 5) }}
+
+    - platform: template
+      id: "7_orange"
+      value_template: >
+        {% set m = states('sensor.plant_7_moisture') | float(0) %}
+        {% set t = states('input_number.plant_7_target_moisture') | float(0) %}
+        {{ m < t and m >= (t - 5) }}
+
+    - platform: template
+      id: "7_red"
+      value_template: >
+        {% set m = states('sensor.plant_7_moisture') | float(0) %}
+        {% set t = states('input_number.plant_7_target_moisture') | float(0) %}
+        {{ m < (t - 5) }}
+
+    - platform: template
+      id: "8_orange"
+      value_template: >
+        {% set m = states('sensor.plant_8_moisture') | float(0) %}
+        {% set t = states('input_number.plant_8_target_moisture') | float(0) %}
+        {{ m < t and m >= (t - 5) }}
+
+    - platform: template
+      id: "8_red"
+      value_template: >
+        {% set m = states('sensor.plant_8_moisture') | float(0) %}
+        {% set t = states('input_number.plant_8_target_moisture') | float(0) %}
+        {{ m < (t - 5) }}
+
+    - platform: template
+      id: "9_orange"
+      value_template: >
+        {% set m = states('sensor.plant_9_moisture') | float(0) %}
+        {% set t = states('input_number.plant_9_target_moisture') | float(0) %}
+        {{ m < t and m >= (t - 5) }}
+
+    - platform: template
+      id: "9_red"
+      value_template: >
+        {% set m = states('sensor.plant_9_moisture') | float(0) %}
+        {% set t = states('input_number.plant_9_target_moisture') | float(0) %}
+        {{ m < (t - 5) }}
+
+  action:
+    - variables:
+        plant_num: "{{ trigger.id.split('_')[0] }}"
+        severity: "{{ trigger.id.split('_')[1] }}"
+        plant_name: "{{ states('input_text.plant_' ~ plant_num ~ '_name') }}"
+        moisture: "{{ states('sensor.plant_' ~ plant_num ~ '_moisture') }}"
+        target: "{{ states('input_number.plant_' ~ plant_num ~ '_target_moisture') }}"
+        severity_label: "{{ 'critical - water now' if severity == 'red' else 'watering needed' }}"
+        severity_icon: "{{ '🔴' if severity == 'red' else '🟠' }}"
+        notif_title: "{{ severity_icon }} {{ plant_name }}"
+        notif_message: >
+          {{ plant_name }}: {{ moisture }}% moisture (target {{ target }}%) — {{ severity_label }}.
+
+    - service: persistent_notification.create
+      data:
+        notification_id: "plant_{{ plant_num }}_watering"
+        title: "{{ notif_title }}"
+        message: "{{ notif_message }}"
+
+    - repeat:
+        for_each:
+          - notify.mobile_app_iphone_bart
+          - notify.mobile_app_ipad_van_bart
+          - notify.mobile_app_margot_prive_14pro
+        sequence:
+          - service: "{{ repeat.item }}"
+            data:
+              title: "{{ notif_title }}"
+              message: "{{ notif_message }}"
+
+- id: plant_watering_daily_reminder
+  alias: Plant Watering Daily Reminder
+
+  trigger:
+    - platform: time
+      at: "19:00:00"
+    - platform: time
+      at: "20:00:00"
+
+  action:
+    - repeat:
+        for_each: ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+        sequence:
+          - variables:
+              plant_num: "{{ repeat.item }}"
+              moisture: "{{ states('sensor.plant_' ~ plant_num ~ '_moisture') | float(0) }}"
+              target: "{{ states('input_number.plant_' ~ plant_num ~ '_target_moisture') | float(0) }}"
+              plant_name: "{{ states('input_text.plant_' ~ plant_num ~ '_name') }}"
+              color: >
+                {% if moisture < (target - 5) %}red{% elif moisture < target %}orange{% else %}green{% endif %}
+
+          - condition: template
+            value_template: "{{ color in ['red', 'orange'] }}"
+
+          - variables:
+              severity_label: "{{ 'critical - water now' if color == 'red' else 'watering needed' }}"
+              severity_icon: "{{ '🔴' if color == 'red' else '🟠' }}"
+              notif_title: "{{ severity_icon }} {{ plant_name }} (reminder)"
+              notif_message: >
+                {{ plant_name }}: {{ moisture }}% moisture (target {{ target }}%) — {{ severity_label }}.
+
+          - service: persistent_notification.create
+            data:
+              notification_id: "plant_{{ plant_num }}_watering"
+              title: "{{ notif_title }}"
+              message: "{{ notif_message }}"
+
+          - repeat:
+              for_each:
+                - notify.mobile_app_iphone_bart
+                - notify.mobile_app_ipad_van_bart
+                - notify.mobile_app_margot_prive_14pro
+              sequence:
+                - service: "{{ repeat.item }}"
+                  data:
+                    title: "{{ notif_title }}"
+                    message: "{{ notif_message }}"
+
   mode: single
