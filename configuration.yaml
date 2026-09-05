@@ -78,4 +78,8 @@ command_line:
   - sensor:
       name: outdoor_learning_analysis
       command: "python3 /config/python_scripts/analyze_outdoor_log.py"
+    value_template: "{{ value_json.keys() | list | count }} zones"
+    json_attributes:
+      - "Zone 1"
+      - "Zone 2"
       scan_interval: 300
