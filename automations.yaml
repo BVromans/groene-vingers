@@ -585,168 +585,24 @@
 
   action:
 
-    # ==========================================
-    # STORE START VALUES
-    # ==========================================
-
-    - service: input_number.set_value
-      target:
-        entity_id: input_number.zone_1_start_timestamp
+    - service: script.record_outdoor_irrigation_event
       data:
-        value: "{{ now().timestamp() }}"
+        zone_id: zone_1
+        location: Tuin
+        tap_entity: switch.taplinker_tuin_linktap_taplinker_1
+        volume_entity: sensor.taplinker_tuin_linktap_taplinker_1_volume
+        plant_slots:
+          - plant_4
+          - plant_5
+          - plant_8
+          - plant_9
+        plant_entities:
+          - sensor.plant_4_moisture
+          - sensor.plant_5_moisture
+          - sensor.plant_8_moisture
+          - sensor.plant_9_moisture
 
-    - service: input_number.set_value
-      target:
-        entity_id: input_number.zone_1_moisture_before
-      data:
-        value: >
-          {{
-            (
-              (states('sensor.plant_4_moisture') | float(0))
-              +
-              (states('sensor.template_plant_9_moisture') | float(0))
-            ) / 2
-            | round(1)
-          }}
-
-    - service: persistent_notification.create
-      data:
-        title: "Zone 1 Learning Started"
-
-        message: >
-          Zone: Tuin
-
-          Start Moisture (avg S4+S9):
-          {{ states('input_number.zone_1_moisture_before') }}%
-
-          Sensor 4:
-          {{ states('sensor.plant_4_moisture') }}%
-
-          Sensor 9:
-          {{ states('sensor.template_plant_9_moisture') }}%
-
-          Timestamp:
-          {{ now().strftime('%Y-%m-%d %H:%M:%S') }}
-
-    # ==========================================
-    # WAIT FOR STOP
-    # ==========================================
-
-    - wait_for_trigger:
-
-        - platform: state
-          entity_id: switch.taplinker_tuin_linktap_taplinker_1
-          to: "off"
-
-    # ==========================================
-    # CALCULATE RUNTIME
-    # ==========================================
-
-    - variables:
-
-        start_ts: >
-          {{ states('input_number.zone_1_start_timestamp') | float(0) }}
-
-        runtime_minutes: >
-          {{ ((now().timestamp() - start_ts) / 60) | round(1) }}
-
-        volume: >
-          {{ states('sensor.taplinker_tuin_linktap_taplinker_1_volume') | float(0) }}
-
-    - service: persistent_notification.create
-      data:
-        title: "Zone 1 Runtime Captured"
-
-        message: >
-          Runtime:
-          {{ runtime_minutes }} min
-
-          Volume:
-          {{ volume }} L
-
-          Waiting 45 minutes for soil stabilization...
-
-    # ==========================================
-    # WAIT FOR INFILTRATION
-    # ==========================================
-
-    - delay:
-        minutes: 45
-
-    # ==========================================
-    # FINAL MEASUREMENT
-    # ==========================================
-
-    - variables:
-
-        before: >
-          {{ states('input_number.zone_1_moisture_before') | float(0) }}
-
-        after: >
-          {{
-            (
-              (states('sensor.plant_4_moisture') | float(0))
-              +
-              (states('sensor.template_plant_9_moisture') | float(0))
-            ) / 2
-            | round(1)
-          }}
-
-        delta: >
-          {{ (after - before) | round(1) }}
-
-    # ==========================================
-    # COMPLETE NOTIFICATION
-    # ==========================================
-
-    - service: persistent_notification.create
-      data:
-        title: "Outdoor Zone 1 Learning Complete"
-
-        message: >
-          Zone: Tuin
-
-          Before:
-          {{ before }}%
-
-          After:
-          {{ after }}%
-
-          Sensor 4:
-          {{ states('sensor.plant_4_moisture') }}%
-
-          Sensor 9:
-          {{ states('sensor.template_plant_9_moisture') }}%
-
-          Delta:
-          {{ delta }}%
-
-          Runtime:
-          {{ runtime_minutes }} min
-
-          Volume:
-          {{ volume }} L
-
-    # ==========================================
-    # CSV LOGGING
-    # ==========================================
-
-    - service: input_number.set_value
-      target:
-        entity_id: input_number.zone_1_last_delta
-      data:
-        value: "{{ delta }}"
-
-    - service: shell_command.append_outdoor_learning_log
-      data:
-        line: >
-          {{ now().strftime('%Y-%m-%d %H:%M:%S') }},
-          Zone 1,
-          {{ before }},
-          {{ after }},
-          {{ delta }},
-          {{ runtime_minutes }},
-          {{ volume }}
+    - stop: "Handled by shared outdoor irrigation event script"
 
 # ==========================================
 # ZONE 2 - BALKON
@@ -762,141 +618,20 @@
 
   action:
 
-    # ==========================================
-    # STORE START VALUES
-    # ==========================================
-
-    - service: input_number.set_value
-      target:
-        entity_id: input_number.zone_2_start_timestamp
+    - service: script.record_outdoor_irrigation_event
       data:
-        value: "{{ now().timestamp() }}"
+        zone_id: zone_2
+        location: Balkon
+        tap_entity: switch.taplinker_balkon_linktap_taplinker_2
+        volume_entity: sensor.taplinker_balkon_linktap_taplinker_2_volume
+        plant_slots:
+          - plant_6
+          - plant_7
+        plant_entities:
+          - sensor.plant_6_moisture
+          - sensor.plant_7_moisture
 
-    - service: input_number.set_value
-      target:
-        entity_id: input_number.zone_2_moisture_before
-      data:
-        value: "{{ states('sensor.plant_7_moisture') | float(0) }}"
-
-    - service: persistent_notification.create
-      data:
-        title: "Zone 2 Learning Started"
-
-        message: >
-          Zone: Balkon
-
-          Start Moisture:
-          {{ states('sensor.plant_7_moisture') }}%
-
-          Timestamp:
-          {{ now().strftime('%Y-%m-%d %H:%M:%S') }}
-
-    # ==========================================
-    # WAIT FOR STOP
-    # ==========================================
-
-    - wait_for_trigger:
-
-        - platform: state
-          entity_id: switch.taplinker_balkon_linktap_taplinker_2
-          to: "off"
-
-    # ==========================================
-    # CALCULATE RUNTIME
-    # ==========================================
-
-    - variables:
-
-        start_ts: >
-          {{ states('input_number.zone_2_start_timestamp') | float(0) }}
-
-        runtime_minutes: >
-          {{ ((now().timestamp() - start_ts) / 60) | round(1) }}
-
-        volume: >
-          {{ states('sensor.taplinker_balkon_linktap_taplinker_2_volume') | float(0) }}
-
-    - service: persistent_notification.create
-      data:
-        title: "Zone 2 Runtime Captured"
-
-        message: >
-          Runtime:
-          {{ runtime_minutes }} min
-
-          Volume:
-          {{ volume }} L
-
-          Waiting 45 minutes for soil stabilization...
-
-    # ==========================================
-    # WAIT FOR INFILTRATION
-    # ==========================================
-
-    - delay:
-        minutes: 45
-
-    # ==========================================
-    # FINAL MEASUREMENT
-    # ==========================================
-
-    - variables:
-
-        before: >
-          {{ states('input_number.zone_2_moisture_before') | float(0) }}
-
-        after: >
-          {{ states('sensor.plant_7_moisture') | float(0) }}
-
-        delta: >
-          {{ (after - before) | round(1) }}
-
-    # ==========================================
-    # COMPLETE NOTIFICATION
-    # ==========================================
-
-    - service: persistent_notification.create
-      data:
-        title: "Outdoor Zone 2 Learning Complete"
-
-        message: >
-          Zone: Balkon
-
-          Before:
-          {{ before }}%
-
-          After:
-          {{ after }}%
-
-          Delta:
-          {{ delta }}%
-
-          Runtime:
-          {{ runtime_minutes }} min
-
-          Volume:
-          {{ volume }} L
-
-    # ==========================================
-    # CSV LOGGING
-    # ==========================================
-
-    - service: input_number.set_value
-      target:
-        entity_id: input_number.zone_2_last_delta
-      data:
-        value: "{{ delta }}"
-
-    - service: shell_command.append_outdoor_learning_log
-      data:
-        line: >
-          {{ now().strftime('%Y-%m-%d %H:%M:%S') }},
-          Zone 2,
-          {{ before }},
-          {{ after }},
-          {{ delta }},
-          {{ runtime_minutes }},
-          {{ volume }}
+    - stop: "Handled by shared outdoor irrigation event script"
 
 # =========================
 # LINKTAP STARTUP HEALTH CHECK

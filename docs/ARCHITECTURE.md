@@ -48,6 +48,64 @@ Provides normalized plant-level moisture, battery, health, target and trend.
 ### Event layer
 Records watering observations independently of physical implementation.
 
+The canonical event is one watering observation, regardless of whether the
+water came from a manual action or a LinkTap zone. It should contain:
+
+```text
+event_id
+plant_slots[]
+zone_id
+location
+timestamp_started
+timestamp_stopped
+method
+amount_ml
+runtime_min
+volume_l
+moisture_before
+moisture_after
+moisture_delta
+stabilization_min
+weather_context
+rain_context
+sensor_health
+confidence
+notes
+```
+
+Required invariants:
+
+- `moisture_delta = moisture_after - moisture_before`.
+- `runtime_min` is the trusted irrigation quantity until LinkTap volume is
+      physically calibrated.
+- `volume_l` remains measured data with an explicit trust status; it must not
+      silently become the learning input.
+- A zone event may reference multiple plant slots. Unmonitored containers in
+      the zone remain part of the zone context but do not receive invented plant
+      measurements.
+- Missing, stale or implausible measurements produce an incomplete or rejected
+      learning event, not a zero-valued measurement.
+
+Current zone measurement roles:
+
+```text
+Binnen / no irrigation zone
+      slots: 1, 2, 3
+
+Tuin / Zone 1
+      tap_id: 58BF1A36004B1200_1
+      measured slots: 4, 5, 8, 9
+
+Balkon / Zone 2
+      tap_id: 58BF1A36004B1200_2
+      measured slots: 6, 7
+      additional unmonitored containers: yes
+```
+
+The event model must preserve the distinction between the zone being watered,
+the plant slots with measurements, and other unmonitored containers receiving
+the same water.
+
 ### Learning layer
 Calculates response, trends, confidence and outliers.
 

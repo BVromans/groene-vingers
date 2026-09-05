@@ -160,6 +160,20 @@ Physical inspection showed actual water flow. Therefore runtime is currently
 more trustworthy than reported volume. Do not use current volume readings as
 high-confidence learning data until a physical calibration is performed.
 
+### Confirmed physical mapping
+This is the source of truth for the current physical slot and LinkTap mapping:
+
+- Binnen: logical slots 1–3.
+- Tuin / Zone 1: logical slots 4, 5, 8 and 9.
+- Balkon / Zone 2: logical slots 6 and 7.
+- Additional balcony boxes exist but are currently unmonitored and have no
+	logical plant slot yet.
+- LinkTap device `58BF1A36004B1200_1`: Tuin / Zone 1.
+- LinkTap device `58BF1A36004B1200_2`: Balkon / Zone 2.
+
+Logical slots remain the stable plant identity. Physical sensor or plant
+changes must be handled through the mapping/configuration layer.
+
 ## Kweektafel lesson
 Water can flow and drain without the sensor showing a meaningful moisture rise.
 A historical setup had the sensor about 15 cm from drippers, with 2×2 L/h for

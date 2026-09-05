@@ -74,3 +74,8 @@ command_line:
       name: outdoor_learning_last_entry
       command: "tail -n 1 /config/outdoor_learning_log.csv"
       scan_interval: 60
+
+  - sensor:
+      name: outdoor_learning_analysis
+      command: "python3 /config/python_scripts/analyze_outdoor_log.py"
+      scan_interval: 300

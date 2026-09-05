@@ -1,3 +1,196 @@
+record_outdoor_irrigation_event:
+  alias: Record Outdoor Irrigation Event
+  mode: queued
+  max: 2
+
+  fields:
+    zone_id:
+      description: Stable irrigation zone identifier.
+    location:
+      description: Physical location of the irrigation zone.
+    tap_entity:
+      description: LinkTap switch entity that represents the watering run.
+    volume_entity:
+      description: LinkTap session-volume sensor entity.
+    plant_slots:
+      description: Stable plant slots measured by this zone event.
+    plant_entities:
+      description: Canonical moisture entities measured by this zone event.
+
+  sequence:
+    - variables:
+        started_at: "{{ now().timestamp() }}"
+        zone_label: "{{ 'Zone 1' if zone_id == 'zone_1' else 'Zone 2' }}"
+        before: >
+          {% set ns = namespace(total=0, count=0) %}
+          {% for entity_id in plant_entities %}
+            {% set value = states(entity_id) %}
+            {% if value not in ['unknown', 'unavailable', 'none', ''] and is_number(value) %}
+              {% set ns.total = ns.total + (value | float) %}
+              {% set ns.count = ns.count + 1 %}
+            {% endif %}
+          {% endfor %}
+          {{ (ns.total / ns.count) | round(1) if ns.count == (plant_entities | count) and ns.count > 0 else 'unknown' }}
+        before_valid: >
+          {% set ns = namespace(valid=0) %}
+          {% for entity_id in plant_entities %}
+            {% set value = states(entity_id) %}
+            {% if value not in ['unknown', 'unavailable', 'none', ''] and is_number(value) %}
+              {% set ns.valid = ns.valid + 1 %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.valid == (plant_entities | count) and ns.valid > 0 }}
+
+    - choose:
+        - conditions: "{{ not before_valid }}"
+          sequence:
+            - service: persistent_notification.create
+              data:
+                title: "Outdoor Irrigation Event Rejected"
+                message: >
+                  Zone {{ zone_id }} ({{ location }}) was not logged because one
+                  or more monitored moisture sensors were unavailable or invalid
+                  before watering. Slots: {{ plant_slots | join(', ') }}.
+            - stop: "Invalid moisture-before measurement"
+
+    - service: persistent_notification.create
+      data:
+        title: "Outdoor Irrigation Started"
+        message: >
+          Zone: {{ zone_id }} ({{ location }})
+
+          Plant slots: {{ plant_slots | join(', ') }}
+
+          Moisture before: {{ before }}%
+
+          Timestamp: {{ now().strftime('%Y-%m-%d %H:%M:%S') }}
+
+    - wait_template: "{{ is_state(tap_entity, 'off') }}"
+
+    - variables:
+        runtime_minutes: "{{ ((now().timestamp() - started_at) / 60) | round(1) }}"
+        volume: "{{ states(volume_entity) | float(0) }}"
+
+    - choose:
+        - conditions: "{{ zone_id == 'zone_1' }}"
+          sequence:
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.zone_1_last_runtime
+              data:
+                value: "{{ runtime_minutes }}"
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.zone_1_last_volume
+              data:
+                value: "{{ volume }}"
+        - conditions: "{{ zone_id == 'zone_2' }}"
+          sequence:
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.zone_2_last_runtime
+              data:
+                value: "{{ runtime_minutes }}"
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.zone_2_last_volume
+              data:
+                value: "{{ volume }}"
+
+    - service: persistent_notification.create
+      data:
+        title: "Outdoor Irrigation Runtime Captured"
+        message: >
+          Zone: {{ zone_id }} ({{ location }})
+
+          Runtime: {{ runtime_minutes }} min
+
+          Reported volume: {{ volume }} L (untrusted until calibrated)
+
+          Waiting 45 minutes for soil stabilization.
+
+    - delay:
+        minutes: 45
+
+    - variables:
+        after: >
+          {% set ns = namespace(total=0, count=0) %}
+          {% for entity_id in plant_entities %}
+            {% set value = states(entity_id) %}
+            {% if value not in ['unknown', 'unavailable', 'none', ''] and is_number(value) %}
+              {% set ns.total = ns.total + (value | float) %}
+              {% set ns.count = ns.count + 1 %}
+            {% endif %}
+          {% endfor %}
+          {{ (ns.total / ns.count) | round(1) if ns.count == (plant_entities | count) and ns.count > 0 else 'unknown' }}
+        after_valid: >
+          {% set ns = namespace(valid=0) %}
+          {% for entity_id in plant_entities %}
+            {% set value = states(entity_id) %}
+            {% if value not in ['unknown', 'unavailable', 'none', ''] and is_number(value) %}
+              {% set ns.valid = ns.valid + 1 %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.valid == (plant_entities | count) and ns.valid > 0 }}
+        delta: "{{ (after - before) | round(1) if after_valid else 'unknown' }}"
+
+    - choose:
+        - conditions: "{{ not after_valid }}"
+          sequence:
+            - service: persistent_notification.create
+              data:
+                title: "Outdoor Irrigation Event Incomplete"
+                message: >
+                  Zone {{ zone_id }} ({{ location }}) completed, but the after
+                  measurement was unavailable or invalid. No learning event was
+                  written.
+            - stop: "Invalid moisture-after measurement"
+
+    - choose:
+        - conditions: "{{ zone_id == 'zone_1' }}"
+          sequence:
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.zone_1_last_delta
+              data:
+                value: "{{ delta }}"
+        - conditions: "{{ zone_id == 'zone_2' }}"
+          sequence:
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.zone_2_last_delta
+              data:
+                value: "{{ delta }}"
+
+    - service: shell_command.append_outdoor_learning_log
+      data:
+        line: >
+          {{ now().strftime('%Y-%m-%d %H:%M:%S') }},
+          {{ zone_label }},
+          {{ before }},
+          {{ after }},
+          {{ delta }},
+          {{ runtime_minutes }},
+          {{ volume }}
+
+    - service: persistent_notification.create
+      data:
+        title: "Outdoor Irrigation Event Complete"
+        message: >
+          Zone: {{ zone_id }} ({{ location }})
+
+          Plant slots: {{ plant_slots | join(', ') }}
+
+          Before: {{ before }}%
+
+          After: {{ after }}%
+
+          Delta: {{ delta }}%
+
+          Runtime: {{ runtime_minutes }} min
+
+          Reported volume: {{ volume }} L (untrusted until calibrated)
+
 start_tuin_irrigatie:
   alias: Start Tuin Irrigatie
 
