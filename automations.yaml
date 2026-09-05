@@ -633,6 +633,90 @@
 
     - stop: "Handled by shared outdoor irrigation event script"
 
+- id: outdoor_learning_resume_after_restart
+  alias: Outdoor Learning Resume After Restart
+  mode: single
+
+  trigger:
+    - platform: time_pattern
+      minutes: "/1"
+
+  action:
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.zone_1_learning_pending
+              state: "on"
+            - condition: template
+              value_template: >
+                {{
+                  (now().timestamp()
+                  - states('input_number.zone_1_stopped_timestamp') | float(0)) >= 2700
+                }}
+            - condition: template
+              value_template: >
+                {{
+                  states('sensor.plant_4_moisture') not in ['unknown', 'unavailable']
+                  and states('sensor.plant_5_moisture') not in ['unknown', 'unavailable']
+                  and states('sensor.plant_8_moisture') not in ['unknown', 'unavailable']
+                  and states('sensor.plant_9_moisture') not in ['unknown', 'unavailable']
+                }}
+          sequence:
+            - service: script.record_outdoor_irrigation_completion
+              data:
+                zone_id: zone_1
+                location: Tuin
+                plant_slots:
+                  - plant_4
+                  - plant_5
+                  - plant_8
+                  - plant_9
+                plant_entities:
+                  - sensor.plant_4_moisture
+                  - sensor.plant_5_moisture
+                  - sensor.plant_8_moisture
+                  - sensor.plant_9_moisture
+                before_entity: input_number.zone_1_moisture_before
+                runtime_entity: input_number.zone_1_last_runtime
+                volume_entity: input_number.zone_1_last_volume
+                delta_entity: input_number.zone_1_last_delta
+                stopped_timestamp_entity: input_number.zone_1_stopped_timestamp
+                pending_entity: input_boolean.zone_1_learning_pending
+
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.zone_2_learning_pending
+              state: "on"
+            - condition: template
+              value_template: >
+                {{
+                  (now().timestamp()
+                  - states('input_number.zone_2_stopped_timestamp') | float(0)) >= 2700
+                }}
+            - condition: template
+              value_template: >
+                {{
+                  states('sensor.plant_6_moisture') not in ['unknown', 'unavailable']
+                  and states('sensor.plant_7_moisture') not in ['unknown', 'unavailable']
+                }}
+          sequence:
+            - service: script.record_outdoor_irrigation_completion
+              data:
+                zone_id: zone_2
+                location: Balkon
+                plant_slots:
+                  - plant_6
+                  - plant_7
+                plant_entities:
+                  - sensor.plant_6_moisture
+                  - sensor.plant_7_moisture
+                before_entity: input_number.zone_2_moisture_before
+                runtime_entity: input_number.zone_2_last_runtime
+                volume_entity: input_number.zone_2_last_volume
+                delta_entity: input_number.zone_2_last_delta
+                stopped_timestamp_entity: input_number.zone_2_stopped_timestamp
+                pending_entity: input_boolean.zone_2_learning_pending
+
 # =========================
 # LINKTAP STARTUP HEALTH CHECK
 # =========================

@@ -65,6 +65,28 @@ record_outdoor_irrigation_event:
 
           Timestamp: {{ now().strftime('%Y-%m-%d %H:%M:%S') }}
 
+    - choose:
+        - conditions: "{{ zone_id == 'zone_1' }}"
+          sequence:
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.zone_1_moisture_before
+              data:
+                value: "{{ before }}"
+            - service: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.zone_1_learning_pending
+        - conditions: "{{ zone_id == 'zone_2' }}"
+          sequence:
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.zone_2_moisture_before
+              data:
+                value: "{{ before }}"
+            - service: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.zone_2_learning_pending
+
     - wait_template: "{{ is_state(tap_entity, 'off') }}"
 
     - variables:
@@ -97,6 +119,28 @@ record_outdoor_irrigation_event:
               data:
                 value: "{{ volume }}"
 
+    - choose:
+        - conditions: "{{ zone_id == 'zone_1' }}"
+          sequence:
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.zone_1_stopped_timestamp
+              data:
+                value: "{{ now().timestamp() }}"
+            - service: input_boolean.turn_on
+              target:
+                entity_id: input_boolean.zone_1_learning_pending
+        - conditions: "{{ zone_id == 'zone_2' }}"
+          sequence:
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.zone_2_stopped_timestamp
+              data:
+                value: "{{ now().timestamp() }}"
+            - service: input_boolean.turn_on
+              target:
+                entity_id: input_boolean.zone_2_learning_pending
+
     - service: persistent_notification.create
       data:
         title: "Outdoor Irrigation Runtime Captured"
@@ -107,12 +151,44 @@ record_outdoor_irrigation_event:
 
           Reported volume: {{ volume }} L (untrusted until calibrated)
 
-          Waiting 45 minutes for soil stabilization.
+          Waiting 45 minutes for soil stabilization. The event is persisted and
+          can survive a Home Assistant restart.
 
-    - delay:
-        minutes: 45
+    - stop: "Event persisted; completion is handled by the recovery-safe automation"
 
+record_outdoor_irrigation_completion:
+  alias: Complete Outdoor Irrigation Event
+  mode: queued
+  max: 2
+
+  fields:
+    zone_id:
+      description: Stable irrigation zone identifier.
+    location:
+      description: Physical location of the irrigation zone.
+    plant_slots:
+      description: Stable plant slots measured by this zone event.
+    plant_entities:
+      description: Canonical moisture entities measured by this zone event.
+    before_entity:
+      description: Persisted moisture-before helper entity.
+    runtime_entity:
+      description: Persisted runtime helper entity.
+    volume_entity:
+      description: Persisted reported-volume helper entity.
+    delta_entity:
+      description: Persisted delta helper entity.
+    stopped_timestamp_entity:
+      description: Persisted stop timestamp helper entity.
+    pending_entity:
+      description: Persistent pending-learning flag.
+
+  sequence:
     - variables:
+        zone_label: "{{ 'Zone 1' if zone_id == 'zone_1' else 'Zone 2' }}"
+        before: "{{ states(before_entity) | float(0) }}"
+        runtime_minutes: "{{ states(runtime_entity) | float(0) }}"
+        volume: "{{ states(volume_entity) | float(0) }}"
         after: >
           {% set ns = namespace(total=0, count=0) %}
           {% for entity_id in plant_entities %}
@@ -141,26 +217,16 @@ record_outdoor_irrigation_event:
               data:
                 title: "Outdoor Irrigation Event Incomplete"
                 message: >
-                  Zone {{ zone_id }} ({{ location }}) completed, but the after
-                  measurement was unavailable or invalid. No learning event was
-                  written.
+                  Zone {{ zone_id }} ({{ location }}) is ready for completion,
+                  but one or more after measurements are unavailable or invalid.
+                  The event remains pending for a later retry.
             - stop: "Invalid moisture-after measurement"
 
-    - choose:
-        - conditions: "{{ zone_id == 'zone_1' }}"
-          sequence:
-            - service: input_number.set_value
-              target:
-                entity_id: input_number.zone_1_last_delta
-              data:
-                value: "{{ delta }}"
-        - conditions: "{{ zone_id == 'zone_2' }}"
-          sequence:
-            - service: input_number.set_value
-              target:
-                entity_id: input_number.zone_2_last_delta
-              data:
-                value: "{{ delta }}"
+    - service: input_number.set_value
+      target:
+        entity_id: "{{ delta_entity }}"
+      data:
+        value: "{{ delta }}"
 
     - service: shell_command.append_outdoor_learning_log
       data:
@@ -172,6 +238,10 @@ record_outdoor_irrigation_event:
           {{ delta }},
           {{ runtime_minutes }},
           {{ volume }}
+
+    - service: input_boolean.turn_off
+      target:
+        entity_id: "{{ pending_entity }}"
 
     - service: persistent_notification.create
       data:

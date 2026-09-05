@@ -18,5 +18,11 @@ plant_3_waiting_for_delta:
 zone_1_waiting_for_delta:
   name: Zone 1 Waiting For Delta
 
+zone_1_learning_pending:
+  name: Zone 1 Learning Pending
+
 zone_2_waiting_for_delta:
   name: Zone 2 Waiting For Delta
+
+zone_2_learning_pending:
+  name: Zone 2 Learning Pending

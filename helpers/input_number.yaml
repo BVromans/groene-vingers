@@ -168,6 +168,13 @@ zone_1_last_delta:
   max: 100
   step: 0.1
 
+zone_1_stopped_timestamp:
+  name: Zone 1 Stopped Timestamp
+  min: 0
+  max: 9999999999
+  step: 1
+  mode: box
+
 zone_2_moisture_before:
   name: Zone 2 Moisture Before
   min: 0
@@ -191,3 +198,10 @@ zone_2_last_delta:
   min: -100
   max: 100
   step: 0.1
+
+zone_2_stopped_timestamp:
+  name: Zone 2 Stopped Timestamp
+  min: 0
+  max: 9999999999
+  step: 1
+  mode: box
