@@ -8,6 +8,22 @@ The long-term goal is to learn how individual plants and growing situations
 respond to water and weather, then produce increasingly accurate and safe
 recommendations and, only after sufficient validation, autonomous irrigation.
 
+## Project documentation
+Use these documents as the canonical Groene vingers documentation set:
+
+- [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md): confirmed physical setup, current
+	operating constraints, hardware facts and project decisions.
+- [ARCHITECTURE.md](ARCHITECTURE.md): provider-independent layers, invariants
+	and system boundaries.
+- [WEATHER_IRRIGATION.md](WEATHER_IRRIGATION.md): weather sources, source-of-
+	truth policy, effective rain, seasonal safety and the weather implementation
+	roadmap.
+
+Update the relevant document in the same change whenever confirmed facts,
+source-of-truth decisions, architecture or the implementation roadmap change.
+Avoid duplicating detailed designs across documents; link to the owning document
+instead.
+
 ## Current environment
 - Home Assistant runs on a NUC.
 - VS Code is connected to the HA environment over SSH.
