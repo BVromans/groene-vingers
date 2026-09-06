@@ -122,6 +122,72 @@ weather_source_health
 be calculated from reliable measured-rain history. They must not be inferred
 from a forecast.
 
+## Current implementation status
+As of 2026-09-06, the first normalized weather layer is deployed and remains
+advisory-only. It does not start, stop, reduce or skip irrigation.
+
+Implemented normalized entities:
+
+```text
+weather_current_temperature
+weather_current_humidity
+weather_current_wind_speed
+weather_current_wind_direction
+weather_current_solar_irradiance
+weather_rain_rate
+weather_rain_last_1h
+weather_rain_last_24h
+weather_forecast_rain_next_6h
+weather_forecast_rain_next_24h
+weather_forecast_min_temperature
+weather_warning
+weather_frost_risk
+weather_source_health
+```
+
+The layer updates at Home Assistant startup and when its verified source
+entities update. Verified numeric source values are published only when valid;
+otherwise their normalized entity is `unavailable`. Intentionally unverified
+numeric fields are also `unavailable`. Unverified non-numeric fields remain
+`unknown`.
+
+The following fields are intentionally not populated yet because their provider
+entities are disabled or their forecast horizon is unverified:
+
+```text
+weather_current_wind_direction
+weather_current_solar_irradiance
+weather_forecast_rain_next_6h
+weather_forecast_rain_next_24h
+```
+
+Known separate issue: `LinkTap Startup Health Check` currently logs that
+`has_service` is undefined in its template. This does not affect the weather
+layer or active irrigation event logging, but the compatibility issue should be
+fixed independently before relying on that startup health notification.
+
+## Next session checklist
+
+1. Verify in the Home Assistant UI that the implemented normalized entities
+  show current Ecowitt/KNMI values or the documented unavailable state.
+2. Run one short, manual Zone 1 or Zone 2 irrigation test to confirm that the
+  per-sensor learning log is created and produces one record per measured
+  plant slot. `outdoor_sensor_learning_log.csv` has not yet been created by a
+  post-deployment irrigation event.
+3. Confirm the new records share one `event_id`, retain `runtime_min`, and mark
+  LinkTap volume as `untrusted_until_calibrated`.
+4. Perform a live UI validation of the disabled/unverified Buienradar and KNMI
+  forecast/irradiance entities before enabling or mapping them. Record their
+  actual state, unit, update age and forecast horizon in this document.
+5. Design reliable measured-rain history for 6-hour and 48-hour values before
+  implementing effective rain. Do not synthesize these values from forecast
+  data.
+6. Add weather snapshots to per-sensor learning records only after the first
+  four steps are validated.
+
+Do not begin automated watering decisions. The current weather layer is an
+observability and learning foundation only.
+
 ## Effective rain
 Effective rain is an advisory classification, not a conversion from millimetres
 to irrigation runtime.
