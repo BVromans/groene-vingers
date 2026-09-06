@@ -2098,6 +2098,150 @@
         {{ (previous - current) | round(1) }}
 
     # ==========================================
+    # NORMALIZED WEATHER LAYER
+    # ==========================================
+
+    - name: Weather Current Temperature
+
+      unique_id: weather_current_temperature
+      unit_of_measurement: "°C"
+      state_class: measurement
+
+      state: >
+        {% set value = states('sensor.home_temperature') %}
+        {{ value | float | round(1) if value not in ['unknown', 'unavailable', 'none', ''] and is_number(value) else 'unknown' }}
+
+    - name: Weather Current Humidity
+
+      unique_id: weather_current_humidity
+      unit_of_measurement: "%"
+      state_class: measurement
+
+      state: >
+        {% set value = states('sensor.home_humidity') %}
+        {{ value | float | round(0) if value not in ['unknown', 'unavailable', 'none', ''] and is_number(value) else 'unknown' }}
+
+    - name: Weather Current Wind Speed
+
+      unique_id: weather_current_wind_speed
+      unit_of_measurement: "km/h"
+      state_class: measurement
+
+      state: >
+        {% set value = states('sensor.home_wind_speed') %}
+        {{ value | float | round(1) if value not in ['unknown', 'unavailable', 'none', ''] and is_number(value) else 'unknown' }}
+
+    - name: Weather Current Wind Direction
+
+      unique_id: weather_current_wind_direction
+
+      state: "unknown"
+
+    - name: Weather Current Solar Irradiance
+
+      unique_id: weather_current_solar_irradiance
+      unit_of_measurement: "W/m²"
+      state_class: measurement
+
+      state: "unknown"
+
+    - name: Weather Rain Rate
+
+      unique_id: weather_rain_rate
+      unit_of_measurement: "mm/h"
+      state_class: measurement
+
+      state: >
+        {% set value = states('sensor.gw1200a_rain_rate') %}
+        {{ value | float | round(1) if value not in ['unknown', 'unavailable', 'none', ''] and is_number(value) else 'unknown' }}
+
+    - name: Weather Rain Last 1h
+
+      unique_id: weather_rain_last_1h
+      unit_of_measurement: "mm"
+      state_class: measurement
+
+      state: >
+        {% set value = states('sensor.gw1200a_hourly_rain') %}
+        {{ value | float | round(1) if value not in ['unknown', 'unavailable', 'none', ''] and is_number(value) else 'unknown' }}
+
+    - name: Weather Rain Last 24h
+
+      unique_id: weather_rain_last_24h
+      unit_of_measurement: "mm"
+      state_class: measurement
+
+      state: >
+        {% set value = states('sensor.gw1200a_24h_rain') %}
+        {{ value | float | round(1) if value not in ['unknown', 'unavailable', 'none', ''] and is_number(value) else 'unknown' }}
+
+    - name: Weather Forecast Rain Next 6h
+
+      unique_id: weather_forecast_rain_next_6h
+      unit_of_measurement: "mm"
+      state_class: measurement
+
+      state: "unknown"
+
+    - name: Weather Forecast Rain Next 24h
+
+      unique_id: weather_forecast_rain_next_24h
+      unit_of_measurement: "mm"
+      state_class: measurement
+
+      state: "unknown"
+
+    - name: Weather Forecast Minimum Temperature
+
+      unique_id: weather_forecast_min_temperature
+      unit_of_measurement: "°C"
+      state_class: measurement
+
+      state: >
+        {% set value = states('sensor.home_min_temperature_tomorrow') %}
+        {{ value | float | round(1) if value not in ['unknown', 'unavailable', 'none', ''] and is_number(value) else 'unknown' }}
+
+    - name: Weather Warning
+
+      unique_id: weather_warning
+
+      state: >
+        {% set value = states('binary_sensor.knmi_warning') %}
+        {{ value if value in ['on', 'off'] else 'unknown' }}
+
+    - name: Weather Frost Risk
+
+      unique_id: weather_frost_risk
+
+      state: >
+        {% set minimum = states('sensor.weather_forecast_minimum_temperature') %}
+        {% set warning = states('sensor.weather_warning') %}
+        {% if minimum in ['unknown', 'unavailable', 'none', ''] or warning == 'unknown' %}
+          unknown
+        {% elif warning == 'on' or (minimum | float) <= 2 %}
+          risk
+        {% else %}
+          no_risk
+        {% endif %}
+
+    - name: Weather Source Health
+
+      unique_id: weather_source_health
+
+      state: >
+        {% set required = [
+          states('sensor.weather_rain_rate'),
+          states('sensor.weather_rain_last_1h'),
+          states('sensor.weather_rain_last_24h'),
+          states('sensor.weather_current_temperature'),
+          states('sensor.weather_current_humidity'),
+          states('sensor.weather_current_wind_speed'),
+          states('sensor.weather_forecast_minimum_temperature'),
+          states('sensor.weather_warning')
+        ] %}
+        {{ 'healthy' if 'unknown' not in required and 'unavailable' not in required else 'degraded' }}
+
+    # ==========================================
     # HUIDIG GROEISEIZOEN
     # ==========================================
 

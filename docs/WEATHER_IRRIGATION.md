@@ -228,13 +228,16 @@ reconstructed later from current weather state.
 
 ## Implementation order
 
-1. Verify selected provider entities in the live Home Assistant UI: enabled
-   status, state, unit, update age and forecast horizon.
-2. Implement an advisory-only normalized weather layer with explicit
-   `unknown`/unavailable handling.
-3. Persist reliable measured-rain history for 6-hour and 48-hour calculations.
-4. Implement effective-rain and frost classifications as advisory values.
-5. Add weather snapshots to new per-sensor learning events.
-6. Add dashboard observability for source health and advisory decisions.
-7. Consider autonomous watering only after enough validated events, physical
+1. Completed: verify Ecowitt measured-rain and selected KNMI entities as
+  enabled/current. Buienradar precipitation/irradiance and KNMI solar
+  irradiance remain disabled and unverified.
+2. Completed: implement an advisory-only normalized weather layer using the
+  verified Ecowitt and KNMI entities. Unverified fields remain `unknown`.
+3. Verify forecast horizon before mapping any provider forecast value to a
+  normalized 6-hour or 24-hour field.
+4. Persist reliable measured-rain history for 6-hour and 48-hour calculations.
+5. Implement effective-rain and frost classifications as advisory values.
+6. Add weather snapshots to new per-sensor learning events.
+7. Add dashboard observability for source health and advisory decisions.
+8. Consider autonomous watering only after enough validated events, physical
    winterization controls and complete safety gates exist.
