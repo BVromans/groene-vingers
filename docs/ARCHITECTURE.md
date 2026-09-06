@@ -106,6 +106,11 @@ The event model must preserve the distinction between the zone being watered,
 the plant slots with measurements, and other unmonitored containers receiving
 the same water.
 
+Zone summaries are retained for historical comparison. New learning data is
+also recorded as one sensor-specific row per measured plant slot, correlated by
+one `event_id`. Sensor-specific deltas are primary learning data; zone delta is
+an aggregate only.
+
 ### Learning layer
 Calculates response, trends, confidence and outliers.
 

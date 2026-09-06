@@ -601,6 +601,11 @@
           - sensor.plant_5_moisture
           - sensor.plant_8_moisture
           - sensor.plant_9_moisture
+        before_entities:
+          - input_number.zone_1_plant_4_moisture_before
+          - input_number.zone_1_plant_5_moisture_before
+          - input_number.zone_1_plant_8_moisture_before
+          - input_number.zone_1_plant_9_moisture_before
 
     - stop: "Handled by shared outdoor irrigation event script"
 
@@ -630,6 +635,9 @@
         plant_entities:
           - sensor.plant_6_moisture
           - sensor.plant_7_moisture
+        before_entities:
+          - input_number.zone_2_plant_6_moisture_before
+          - input_number.zone_2_plant_7_moisture_before
 
     - stop: "Handled by shared outdoor irrigation event script"
 
@@ -676,6 +684,11 @@
                   - sensor.plant_5_moisture
                   - sensor.plant_8_moisture
                   - sensor.plant_9_moisture
+                before_entities:
+                  - input_number.zone_1_plant_4_moisture_before
+                  - input_number.zone_1_plant_5_moisture_before
+                  - input_number.zone_1_plant_8_moisture_before
+                  - input_number.zone_1_plant_9_moisture_before
                 before_entity: input_number.zone_1_moisture_before
                 runtime_entity: input_number.zone_1_last_runtime
                 volume_entity: input_number.zone_1_last_volume
@@ -710,6 +723,9 @@
                 plant_entities:
                   - sensor.plant_6_moisture
                   - sensor.plant_7_moisture
+                before_entities:
+                  - input_number.zone_2_plant_6_moisture_before
+                  - input_number.zone_2_plant_7_moisture_before
                 before_entity: input_number.zone_2_moisture_before
                 runtime_entity: input_number.zone_2_last_runtime
                 volume_entity: input_number.zone_2_last_volume

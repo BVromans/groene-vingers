@@ -16,6 +16,8 @@ record_outdoor_irrigation_event:
       description: Stable plant slots measured by this zone event.
     plant_entities:
       description: Canonical moisture entities measured by this zone event.
+    before_entities:
+      description: Persistent per-slot moisture-before helper entities.
 
   sequence:
     - variables:
@@ -64,6 +66,15 @@ record_outdoor_irrigation_event:
           Moisture before: {{ before }}%
 
           Timestamp: {{ now().strftime('%Y-%m-%d %H:%M:%S') }}
+
+    - repeat:
+        for_each: "{{ plant_entities }}"
+        sequence:
+          - service: input_number.set_value
+            target:
+              entity_id: "{{ before_entities[repeat.index - 1] }}"
+            data:
+              value: "{{ states(repeat.item) | float }}"
 
     - choose:
         - conditions: "{{ zone_id == 'zone_1' }}"
@@ -170,6 +181,8 @@ record_outdoor_irrigation_completion:
       description: Stable plant slots measured by this zone event.
     plant_entities:
       description: Canonical moisture entities measured by this zone event.
+    before_entities:
+      description: Persistent per-slot moisture-before helper entities.
     before_entity:
       description: Persisted moisture-before helper entity.
     runtime_entity:
@@ -186,6 +199,8 @@ record_outdoor_irrigation_completion:
   sequence:
     - variables:
         zone_label: "{{ 'Zone 1' if zone_id == 'zone_1' else 'Zone 2' }}"
+        event_id: "{{ zone_id }}_{{ states(stopped_timestamp_entity) | int(0) }}"
+        completed_at: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
         before: "{{ states(before_entity) | float(0) }}"
         runtime_minutes: "{{ states(runtime_entity) | float(0) }}"
         volume: "{{ states(volume_entity) | float(0) }}"
@@ -231,13 +246,37 @@ record_outdoor_irrigation_completion:
     - service: shell_command.append_outdoor_learning_log
       data:
         line: >
-          {{ now().strftime('%Y-%m-%d %H:%M:%S') }},
+          {{ completed_at }},
           {{ zone_label }},
           {{ before }},
           {{ after }},
           {{ delta }},
           {{ runtime_minutes }},
           {{ volume }}
+
+    - repeat:
+        for_each: "{{ plant_slots }}"
+        sequence:
+          - variables:
+              plant_slot: "{{ repeat.item }}"
+              moisture_entity: "{{ plant_entities[repeat.index - 1] }}"
+              sensor_before: "{{ states(before_entities[repeat.index - 1]) | float(0) }}"
+              sensor_after: "{{ states(plant_entities[repeat.index - 1]) | float(0) }}"
+              sensor_delta: "{{ (sensor_after - sensor_before) | round(1) }}"
+          - service: shell_command.append_outdoor_sensor_learning_log
+            data:
+              line: >
+                {{ completed_at }},
+                {{ event_id }},
+                {{ zone_id }},
+                {{ plant_slot }},
+                {{ moisture_entity }},
+                {{ sensor_before }},
+                {{ sensor_after }},
+                {{ sensor_delta }},
+                {{ runtime_minutes }},
+                {{ volume }},
+                untrusted_until_calibrated
 
     - service: input_boolean.turn_off
       target:
