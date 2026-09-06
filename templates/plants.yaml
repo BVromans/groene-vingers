@@ -3,6 +3,9 @@
 # =========================
 
 - trigger:
+    - platform: homeassistant
+      event: start
+
     - platform: state
       entity_id:
 
@@ -49,6 +52,16 @@
         - sensor.gw1200a_soil_battery_7
         - sensor.gw1200a_soil_battery_8
         - sensor.gw1200a_soil_battery_9
+
+        # Verified weather sources
+        - sensor.gw1200a_rain_rate
+        - sensor.gw1200a_hourly_rain
+        - sensor.gw1200a_24h_rain
+        - sensor.home_temperature
+        - sensor.home_humidity
+        - sensor.home_wind_speed
+        - sensor.home_min_temperature_tomorrow
+        - binary_sensor.knmi_warning
 
   sensor:
 
@@ -2106,30 +2119,33 @@
       unique_id: weather_current_temperature
       unit_of_measurement: "°C"
       state_class: measurement
+      availability: >
+        {{ states('sensor.home_temperature') not in ['unknown', 'unavailable', 'none', '']
+          and is_number(states('sensor.home_temperature')) }}
 
-      state: >
-        {% set value = states('sensor.home_temperature') %}
-        {{ value | float | round(1) if value not in ['unknown', 'unavailable', 'none', ''] and is_number(value) else 'unknown' }}
+      state: "{{ states('sensor.home_temperature') | float(0) | round(1) }}"
 
     - name: Weather Current Humidity
 
       unique_id: weather_current_humidity
       unit_of_measurement: "%"
       state_class: measurement
+      availability: >
+        {{ states('sensor.home_humidity') not in ['unknown', 'unavailable', 'none', '']
+          and is_number(states('sensor.home_humidity')) }}
 
-      state: >
-        {% set value = states('sensor.home_humidity') %}
-        {{ value | float | round(0) if value not in ['unknown', 'unavailable', 'none', ''] and is_number(value) else 'unknown' }}
+      state: "{{ states('sensor.home_humidity') | float(0) | round(0) }}"
 
     - name: Weather Current Wind Speed
 
       unique_id: weather_current_wind_speed
       unit_of_measurement: "km/h"
       state_class: measurement
+      availability: >
+        {{ states('sensor.home_wind_speed') not in ['unknown', 'unavailable', 'none', '']
+          and is_number(states('sensor.home_wind_speed')) }}
 
-      state: >
-        {% set value = states('sensor.home_wind_speed') %}
-        {{ value | float | round(1) if value not in ['unknown', 'unavailable', 'none', ''] and is_number(value) else 'unknown' }}
+      state: "{{ states('sensor.home_wind_speed') | float(0) | round(1) }}"
 
     - name: Weather Current Wind Direction
 
@@ -2142,64 +2158,71 @@
       unique_id: weather_current_solar_irradiance
       unit_of_measurement: "W/m²"
       state_class: measurement
+      availability: "{{ false }}"
 
-      state: "unknown"
+      state: 0
 
     - name: Weather Rain Rate
 
       unique_id: weather_rain_rate
       unit_of_measurement: "mm/h"
       state_class: measurement
+      availability: >
+        {{ states('sensor.gw1200a_rain_rate') not in ['unknown', 'unavailable', 'none', '']
+          and is_number(states('sensor.gw1200a_rain_rate')) }}
 
-      state: >
-        {% set value = states('sensor.gw1200a_rain_rate') %}
-        {{ value | float | round(1) if value not in ['unknown', 'unavailable', 'none', ''] and is_number(value) else 'unknown' }}
+      state: "{{ states('sensor.gw1200a_rain_rate') | float(0) | round(1) }}"
 
     - name: Weather Rain Last 1h
 
       unique_id: weather_rain_last_1h
       unit_of_measurement: "mm"
       state_class: measurement
+      availability: >
+        {{ states('sensor.gw1200a_hourly_rain') not in ['unknown', 'unavailable', 'none', '']
+          and is_number(states('sensor.gw1200a_hourly_rain')) }}
 
-      state: >
-        {% set value = states('sensor.gw1200a_hourly_rain') %}
-        {{ value | float | round(1) if value not in ['unknown', 'unavailable', 'none', ''] and is_number(value) else 'unknown' }}
+      state: "{{ states('sensor.gw1200a_hourly_rain') | float(0) | round(1) }}"
 
     - name: Weather Rain Last 24h
 
       unique_id: weather_rain_last_24h
       unit_of_measurement: "mm"
       state_class: measurement
+      availability: >
+        {{ states('sensor.gw1200a_24h_rain') not in ['unknown', 'unavailable', 'none', '']
+          and is_number(states('sensor.gw1200a_24h_rain')) }}
 
-      state: >
-        {% set value = states('sensor.gw1200a_24h_rain') %}
-        {{ value | float | round(1) if value not in ['unknown', 'unavailable', 'none', ''] and is_number(value) else 'unknown' }}
+      state: "{{ states('sensor.gw1200a_24h_rain') | float(0) | round(1) }}"
 
     - name: Weather Forecast Rain Next 6h
 
       unique_id: weather_forecast_rain_next_6h
       unit_of_measurement: "mm"
       state_class: measurement
+      availability: "{{ false }}"
 
-      state: "unknown"
+      state: 0
 
     - name: Weather Forecast Rain Next 24h
 
       unique_id: weather_forecast_rain_next_24h
       unit_of_measurement: "mm"
       state_class: measurement
+      availability: "{{ false }}"
 
-      state: "unknown"
+      state: 0
 
     - name: Weather Forecast Minimum Temperature
 
       unique_id: weather_forecast_min_temperature
       unit_of_measurement: "°C"
       state_class: measurement
+      availability: >
+        {{ states('sensor.home_min_temperature_tomorrow') not in ['unknown', 'unavailable', 'none', '']
+          and is_number(states('sensor.home_min_temperature_tomorrow')) }}
 
-      state: >
-        {% set value = states('sensor.home_min_temperature_tomorrow') %}
-        {{ value | float | round(1) if value not in ['unknown', 'unavailable', 'none', ''] and is_number(value) else 'unknown' }}
+      state: "{{ states('sensor.home_min_temperature_tomorrow') | float(0) | round(1) }}"
 
     - name: Weather Warning
 

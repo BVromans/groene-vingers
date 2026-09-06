@@ -232,7 +232,10 @@ reconstructed later from current weather state.
   enabled/current. Buienradar precipitation/irradiance and KNMI solar
   irradiance remain disabled and unverified.
 2. Completed: implement an advisory-only normalized weather layer using the
-  verified Ecowitt and KNMI entities. Unverified fields remain `unknown`.
+  verified Ecowitt and KNMI entities. Unverified numeric fields remain
+  `unavailable`; unverified non-numeric fields remain `unknown`. Verified
+  numeric fields are also `unavailable` while their source is temporarily
+  unavailable, rather than reporting an invalid numeric state.
 3. Verify forecast horizon before mapping any provider forecast value to a
   normalized 6-hour or 24-hour field.
 4. Persist reliable measured-rain history for 6-hour and 48-hour calculations.
