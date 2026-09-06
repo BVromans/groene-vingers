@@ -19,14 +19,26 @@ recommendations and, only after sufficient validation, autonomous irrigation.
 ## Hardware / integrations
 
 ### Ecowitt
-GW1200A gateways are used for soil monitoring.
+GW1200A gateways are used for soil monitoring and local rain measurement.
 Known historical gateway details:
 - model: GW1200A
 - firmware previously observed: GW1200A_V1.4.6
 - 868 MHz
 - upload interval about 60 seconds
 
-A second gateway has been added and a ninth soil sensor is sending data.
+Gateway 1 (`GW1200A-EJS60`) has the physical rain gauge and soil sensors 1–8.
+The rain gauge is installed in a representative location, not under cover, and
+is the source of truth for measured local rainfall and rain intensity.
+
+Gateway 2 (`GW1200A-EJS60-2`) currently has only soil sensor 9. It is reserved
+for future expansion with additional soil sensors.
+
+Gateway temperature and humidity values (`tempinc` and `humidityin`) describe
+the gateway environment and must not be used as outdoor weather inputs.
+
+Future: an Ecowitt outdoor temperature/humidity sensor will become the
+preferred source for current local outdoor temperature and humidity once it is
+installed and its entities are verified.
 
 Raw entities historically included names such as:
 `sensor.gw1200a_soil_moisture_1`
@@ -188,9 +200,21 @@ sensor only tells part of the story. `container_type` must distinguish
 reservoir/self-watering systems where relevant.
 
 ## Weather
-Historically:
-- Buienradar for local/short-term rain;
-- KNMI for forecast, temperature, wind and warnings.
+Current source policy:
+- Ecowitt gateway 1 for measured local rain, rain rate and accumulated rain;
+- KNMI, Buienradar or Met.no for outdoor temperature, humidity, wind,
+	wind direction, UV and solar radiation only after the available entities and
+	their update behaviour have been inventoried;
+- Buienradar for short-term rain forecast only if an actual suitable forecast
+	entity is present;
+- KNMI or Met.no for broader forecast and frost context only if actual suitable
+	forecast entities are present;
+- KNMI warnings only if a warning entity is present.
+
+Do not use Ecowitt gateway environment values (`tempinc`, `humidityin`) as
+outdoor weather. Do not infer unavailable weather data or replace a missing
+measured-rain value with a forecast. Missing safety-relevant weather data must
+remain `unknown` and prevent autonomous irrigation decisions.
 
 A first-pass weather stress heuristic was approximately:
 temperature × 2 + (100 - humidity) × 0.6 + wind × 1.5, clamped to 0–100.

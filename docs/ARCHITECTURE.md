@@ -27,6 +27,13 @@ Irrigation execution
 Knows Ecowitt, LinkTap, Rain Bird and other integrations. It should not know
 that a sensor represents a particular plant.
 
+For weather inputs, the raw layer distinguishes measured local conditions from
+forecast data. Ecowitt gateway 1 is the authoritative raw source for rainfall,
+rain rate and accumulated rain. Its gateway environment temperature and
+humidity are not outdoor-weather inputs. Forecast providers are selected per
+field only after their actual Home Assistant entities and update behaviour are
+verified.
+
 ### Plant abstraction layer
 Maps stable plant slots to physical sensors and configuration.
 
@@ -44,6 +51,8 @@ Plant 7
 
 ### Measurement layer
 Provides normalized plant-level moisture, battery, health, target and trend.
+It also normalizes weather inputs so plant and irrigation logic does not depend
+on provider-specific entity IDs.
 
 ### Event layer
 Records watering observations independently of physical implementation.
