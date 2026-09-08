@@ -912,23 +912,14 @@
         title: "{{ notif_title }}"
         message: "{{ notif_message }}"
 
-    - repeat:
-        for_each:
-          - notify.mobile_app_iphone_bart
-          - notify.mobile_app_ipad_van_bart
-          - notify.mobile_app_margot_prive_14pro
-        sequence:
-          - service: "{{ repeat.item }}"
-            data:
-              title: "{{ notif_title }}"
-              message: "{{ notif_message }}"
+    # Mobile/desktop push is intentionally not sent here. Threshold changes can
+    # occur at any time of day, but pushes should only go out via the daily
+    # 20:00 reminder below.
 
 - id: plant_watering_daily_reminder
   alias: Plant Watering Daily Reminder
 
   trigger:
-    - platform: time
-      at: "19:00:00"
     - platform: time
       at: "20:00:00"
 
